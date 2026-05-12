@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0306" />
+    <title>FOKA · Marathon</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="rotate-prompt" aria-hidden="true">
+      <div class="rotate-icon">⟳</div>
+      <div class="rotate-heading">Rotate your device</div>
+      <div class="rotate-body">Marathon is designed for landscape.</div>
+    </div>
+
+    <main id="app" class="app">
+      <!-- SCREEN 1: Splash -->
+      <section class="screen splash" data-screen="splash" aria-hidden="false">
+        <div class="splash-mark">
+          <span class="mark-glyph">∞</span>
+          <span class="mark-name">Marathon</span>
+        </div>
+      </section>
+
+      <!-- SCREENS 2–4: Intro 1, 2, 3 -->
+      <section class="screen intro" data-screen="intro" aria-hidden="true">
+        <header class="topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Marathon</span>
+          </div>
+          <div class="intro-dots" aria-hidden="true">
+            <span class="dot" data-dot="0"></span>
+            <span class="dot" data-dot="1"></span>
+            <span class="dot" data-dot="2"></span>
+          </div>
+        </header>
+        <div class="intro-body">
+          <h1 class="intro-title"></h1>
+          <p class="intro-subtitle"></p>
+          <div class="intro-flag"></div>
+          <div class="intro-copy"></div>
+        </div>
+        <footer class="intro-footer">
+          <button class="btn btn-primary intro-next" type="button">Next</button>
+        </footer>
+      </section>
+
+      <!-- SCREEN 5: Marathon -->
+      <section class="screen marathon" data-screen="marathon" aria-hidden="true">
+        <div class="marathon-bg" aria-hidden="true"></div>
+
+        <header class="topbar marathon-topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Marathon</span>
+          </div>
+          <div class="header-ticker" aria-live="polite">
+            <span class="header-msg"></span>
+          </div>
+        </header>
+
+        <div class="wheels" aria-label="Three slot machine wheels">
+          <div class="wheel" data-wheel="1">
+            <div class="wheel-viewport">
+              <div class="wheel-strip"></div>
+            </div>
+            <div class="wheel-focus" aria-hidden="true"></div>
+          </div>
+          <div class="wheel" data-wheel="3">
+            <div class="wheel-viewport">
+              <div class="wheel-strip"></div>
+            </div>
+            <div class="wheel-focus" aria-hidden="true"></div>
+          </div>
+          <div class="wheel" data-wheel="2">
+            <div class="wheel-viewport">
+              <div class="wheel-strip"></div>
+            </div>
+            <div class="wheel-focus" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <footer class="marathon-footer">
+          <div class="timer">
+            <div class="timer-track">
+              <div class="timer-fill"></div>
+            </div>
+          </div>
+          <button class="btn btn-spin" type="button" disabled>Spin</button>
+        </footer>
+
+        <!-- Part 4 in-game overlay: fades after a few seconds -->
+        <div class="game-overlay" aria-hidden="true">
+          <div class="game-overlay-inner">
+            <div class="game-overlay-heading"></div>
+            <div class="game-overlay-body"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN 6: Final -->
+      <section class="screen final" data-screen="final" aria-hidden="true">
+        <header class="topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Marathon</span>
+          </div>
+        </header>
+        <div class="final-body">
+          <h1 class="final-heading"></h1>
+          <div class="final-copy"></div>
+          <form class="final-form" novalidate>
+            <label class="final-label" for="final-email"></label>
+            <div class="final-input-row">
+              <input
+                id="final-email"
+                class="final-input"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                spellcheck="false"
+                required
+              />
+              <button class="btn btn-primary final-submit" type="submit">Notify Me</button>
+            </div>
+            <div class="final-feedback" role="status" aria-live="polite"></div>
+          </form>
+        </div>
+      </section>
+    </main>
+
+    <script src="content.js"></script>
+    <script src="script.js"></script>
+  </body>
+</html>
