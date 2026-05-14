@@ -45,24 +45,23 @@
         margin: 0;
         text-transform: uppercase;
       }
-      .credit {
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        color: rgba(244, 228, 193, 0.32);
-        margin: 0;
-        text-align: center;
-      }
-      .credit a {
-        color: rgba(244, 228, 193, 0.5);
-        text-decoration: none;
-        border-bottom: 1px dotted rgba(244, 228, 193, 0.25);
-      }
       .hint {
         font-size: 11px;
         letter-spacing: 0.18em;
         color: rgba(244, 228, 193, 0.4);
         margin: -20px 0 0;
         text-transform: uppercase;
+      }
+      .credit {
+        font-size: 11px;
+        letter-spacing: 0.14em;
+        color: rgba(244, 228, 193, 0.32);
+        margin: 0;
+      }
+      .credit a {
+        color: rgba(244, 228, 193, 0.5);
+        text-decoration: none;
+        border-bottom: 1px dotted rgba(244, 228, 193, 0.25);
       }
       .reset {
         font-family: 'Cormorant Garamond', serif;
@@ -79,155 +78,131 @@
       }
       .reset:hover { color: var(--gold); border-color: rgba(201, 162, 83, 0.4); }
 
-      /* ====================================================== */
-      /* Peel button — adapted from Patrick Kunka's CodePen     */
-      /* https://codepen.io/patrickkunka/pen/axEgL              */
-      /*                                                         */
-      /* Two clipping windows (.front, .back) live inside        */
-      /* rotated wrappers (.sticky). Each window contains the    */
-      /* SAME circle at different vertical offsets, so each      */
-      /* shows a different slice of the same circle. As the      */
-      /* windows resize and the circles shift, the visual is a   */
-      /* sticker peeling off — no 3D transforms required.        */
-      /*                                                         */
-      /* Triggers on :hover (desktop preview) AND when the       */
-      /* `.peeling` class is set (click toggle, works on mobile).*/
-      /* ====================================================== */
+      /* ========================================================== */
+      /* Rectangular peel button                                     */
+      /*                                                              */
+      /* Same three-layer idea as Patrick Kunka's CodePen but the    */
+      /* 45° rotation trick is dropped (rectangles can't rotate      */
+      /* invisibly). The diagonal fold is built into clip-paths.    */
+      /*                                                              */
+      /*   layer 1 .reveal  PEELED text, full rectangle              */
+      /*   layer 2 .front   gold sticker, clip-path morphs from      */
+      /*                    "full minus tiny TL corner" to "small    */
+      /*                    BR triangle". The label sits inside so   */
+      /*                    it peels with the sticker.                */
+      /*   layer 3 .back    back-of-sticker. Gradient is transparent */
+      /*                    at the TL corner and opaque toward the   */
+      /*                    fold edge — so PEELED reads near the     */
+      /*                    corner while the burgundy "back" reads   */
+      /*                    along the fold.                           */
+      /* ========================================================== */
 
-      .anim750 { transition: all 0.75s cubic-bezier(0.55, 0.05, 0.4, 1); }
-
-      #peel {
+      .peel-btn {
         position: relative;
-        width: 180px;
-        height: 180px;
-        backface-visibility: hidden;
+        width: 260px;
+        height: 80px;
+        border: none;
+        background: none;
+        padding: 0;
         cursor: pointer;
+        font-family: inherit;
       }
 
-      #peel .sticky {
+      /* Layer 1 — what's revealed beneath the sticker. */
+      .peel-btn .reveal {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 180px;
-        height: 180px;
-        transform: rotate(45deg);
-      }
-
-      #peel .circle-wrap {
-        position: absolute;
-        width: 180px;
-        height: 180px;
-        left: 0;
-        top: 0;
-        overflow: hidden;
-      }
-
-      #peel .circle {
-        position: absolute;
-        width: 140px;
-        height: 140px;
-        margin: 20px;
-        border-radius: 999px;
-      }
-
-      /* Reveal — the surface beneath the sticker. */
-      #peel .reveal .circle {
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         background: var(--burgundy-back);
-        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.5);
+        border-radius: 14px;
+        box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.45);
         font-family: 'Cormorant Garamond', serif;
         font-weight: 500;
-        font-size: 13px;
-        letter-spacing: 0.24em;
-        line-height: 140px;
-        text-align: center;
+        font-size: 14px;
+        letter-spacing: 0.26em;
         color: var(--gold-bright);
-        text-shadow: 0 0 14px rgba(201, 162, 83, 0.4);
+        text-shadow: 0 0 14px rgba(201, 162, 83, 0.45);
         text-transform: uppercase;
+        z-index: 1;
       }
 
-      /* Back — the peeled-back portion. Thin sliver near the top at
-         rest; grows downward on peel. */
-      #peel .back {
-        height: 10px;
-        top: 30px;
-      }
-      #peel .back .circle {
-        margin-top: -130px;
-        background-color: var(--gold-deep);
-        background-image: linear-gradient(
-          to top,
-          rgba(201, 162, 83, 0) 0%,
-          rgba(255, 240, 200, 0.55) 100%
-        );
-      }
-
-      /* Front — the visible face of the sticker. */
-      #peel .front {
-        height: 150px;
-        bottom: 0;
-        top: auto;
-        box-shadow: 0 -140px 20px -140px rgba(0, 0, 0, 0.3);
-      }
-      #peel .front .circle {
-        margin-top: -10px;
-        background-color: var(--gold-bright);
-        background-image: linear-gradient(
-          to top,
-          rgba(201, 162, 83, 0) 75%,
-          var(--burgundy) 95%
-        );
+      /* Layer 2 — the gold sticker face. */
+      .peel-btn .front {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
+        border-radius: 14px;
+        box-shadow:
+          0 0 0 1px rgba(201, 162, 83, 0.65),
+          0 10px 22px rgba(201, 162, 83, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        /* Initial: full rectangle MINUS a small TL corner so the .back
+           flap shows through (the "this is peelable" visual cue). */
+        clip-path: polygon(8% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 8%);
+        z-index: 2;
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
       }
 
-      /* Label that fades during the peel. */
-      #peel h4 {
+      /* Label rides inside .front so it peels with the sticker. */
+      .peel-btn .front .label {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         font-family: 'Cormorant Garamond', serif;
         font-weight: 600;
-        font-size: 16px;
+        font-size: 19px;
         letter-spacing: 0.22em;
         color: #1a0508;
         text-transform: uppercase;
-        text-align: center;
-        position: absolute;
-        width: 180px;
-        height: 140px;
-        line-height: 140px;
-        margin: 20px 0;
-        top: 0;
-        left: 0;
-        z-index: 5;
         pointer-events: none;
         transition: opacity 0.05s linear 0.4s;
       }
 
+      /* Layer 3 — back of sticker. Gradient is transparent toward the
+         TL corner (so PEELED shows through there) and opaque toward
+         the fold edge (so the back-of-sticker reads near the fold).
+         Gradient angle ~165deg roughly aligns with the BR-direction
+         given the 260:80 aspect ratio. */
+      .peel-btn .back {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+          165deg,
+          rgba(40, 14, 22, 0.0)  0%,
+          rgba(40, 14, 22, 0.0)  20%,
+          rgba(58, 20, 30, 0.45) 38%,
+          rgba(74, 26, 38, 0.88) 55%,
+          rgba(96, 38, 52, 0.95) 72%,
+          rgba(132, 60, 82, 0.85) 90%,
+          rgba(160, 90, 110, 0.0) 100%
+        );
+        border-radius: 14px;
+        /* Initial: tiny TL flap (mirrors the .front's TL cut). */
+        clip-path: polygon(0% 0%, 8% 0%, 0% 8%, 0% 0%, 0% 0%);
+        filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.45));
+        z-index: 3;
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
+      }
+
       /* PEELED state — fires on hover OR when .peeling is set. */
-      #peel:hover .sticky,
-      #peel.peeling .sticky {
-        transform: rotate(10deg);
+      .peel-btn:hover .front,
+      .peel-btn.peeling .front {
+        /* Most of the sticker is gone; small BR pentagon remains. */
+        clip-path: polygon(80% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 80%);
       }
-      #peel:hover .back,
-      #peel.peeling .back {
-        height: 90px;
-        top: 110px;
-      }
-      #peel:hover .back .circle,
-      #peel.peeling .back .circle {
-        margin-top: -50px;
-      }
-      #peel:hover .front,
-      #peel.peeling .front {
-        height: 70px;
-        box-shadow: 0 -60px 10px -60px rgba(0, 0, 0, 0.1);
-      }
-      #peel:hover .front .circle,
-      #peel.peeling .front .circle {
-        margin-top: -90px;
-        background-color: var(--gold);
-        background-position: 0 100px;
-      }
-      #peel:hover h4,
-      #peel.peeling h4 {
+      .peel-btn:hover .label,
+      .peel-btn.peeling .label {
         opacity: 0;
         transition: opacity 0.05s linear 0.3s;
+      }
+      .peel-btn:hover .back,
+      .peel-btn.peeling .back {
+        /* Lifted region grows from a flap to a large TL triangle. */
+        clip-path: polygon(0% 0%, 80% 0%, 0% 80%, 0% 0%, 0% 0%);
       }
     </style>
   </head>
@@ -235,25 +210,13 @@
     <main class="lab">
       <h1>Peel Lab</h1>
 
-      <div id="peel" class="anim750">
-        <div class="reveal circle-wrap">
-          <div class="circle">PEELED</div>
-        </div>
-
-        <div class="sticky anim750">
-          <div class="front circle-wrap anim750">
-            <div class="circle anim750"></div>
-          </div>
-        </div>
-
-        <h4>PEEL ME</h4>
-
-        <div class="sticky anim750">
-          <div class="back circle-wrap anim750">
-            <div class="circle anim750"></div>
-          </div>
-        </div>
-      </div>
+      <button class="peel-btn" type="button">
+        <span class="reveal">PEELED</span>
+        <span class="front">
+          <span class="label">CLICK ME</span>
+        </span>
+        <span class="back" aria-hidden="true"></span>
+      </button>
 
       <p class="hint">Hover to preview · Click to lock peeled</p>
 
@@ -268,10 +231,10 @@
     </main>
 
     <script>
-      const peel = document.getElementById('peel');
+      const btn = document.querySelector('.peel-btn');
       const reset = document.querySelector('.reset');
-      peel.addEventListener('click', () => peel.classList.toggle('peeling'));
-      reset.addEventListener('click', () => peel.classList.remove('peeling'));
+      btn.addEventListener('click', () => btn.classList.toggle('peeling'));
+      reset.addEventListener('click', () => btn.classList.remove('peeling'));
     </script>
   </body>
 </html>
