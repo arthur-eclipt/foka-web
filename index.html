@@ -3,35 +3,31 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Peel Lab</title>
+    <title>Peel Lab — 3 variations</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@500;600&display=swap" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@400;500;600&display=swap" />
     <style>
       :root {
-        --gold:        #c9a253;
-        --gold-bright: #e6c177;
-        --burgundy:    #4a0d18;
-        --burgundy-deep: #2c0810;
-        --bg-dark:     #160508;
-        --ink:         #f4e4c1;
-
-        /* Knob: where the peel anchors on the sticker. Tweak per iteration.
-           Other directions to try: 'br' (bottom-right), 'tl' (top-left). */
-        --anchor: 'tr';
+        --gold:           #c9a253;
+        --gold-bright:    #e6c177;
+        --burgundy:       #4a0d18;
+        --burgundy-back:  #2c0810;
+        --bg:             #0a0306;
+        --ink:            #f4e4c1;
       }
 
       * { box-sizing: border-box; }
       html, body {
         margin: 0;
-        height: 100%;
+        min-height: 100%;
         background:
-          radial-gradient(ellipse at center, #220a10 0%, var(--bg-dark) 70%);
+          radial-gradient(ellipse at center, #220a10 0%, var(--bg) 70%);
         font-family: 'Inter', system-ui, sans-serif;
         color: var(--ink);
         display: grid;
         place-items: center;
-        overflow: hidden;
+        padding: 32px 16px;
         touch-action: manipulation;
       }
 
@@ -39,27 +35,42 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 32px;
+        gap: 28px;
       }
       .lab h1 {
         font-family: 'Cormorant Garamond', serif;
         font-weight: 500;
-        font-size: 20px;
-        letter-spacing: 0.08em;
+        font-size: 22px;
+        letter-spacing: 0.16em;
         color: rgba(244, 228, 193, 0.55);
-        margin: 0;
+        margin: 0 0 4px;
         text-transform: uppercase;
       }
+
+      .row {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+      }
+      .label {
+        font-size: 11px;
+        letter-spacing: 0.22em;
+        color: rgba(244, 228, 193, 0.45);
+        text-transform: uppercase;
+        font-weight: 500;
+      }
+
       .reset {
-        margin-top: 12px;
+        margin-top: 14px;
         font-family: 'Cormorant Garamond', serif;
         font-size: 14px;
         background: none;
-        color: rgba(244, 228, 193, 0.55);
+        color: rgba(244, 228, 193, 0.5);
         border: 1px solid rgba(244, 228, 193, 0.2);
-        padding: 8px 18px;
+        padding: 9px 22px;
         border-radius: 999px;
-        letter-spacing: 0.12em;
+        letter-spacing: 0.18em;
         text-transform: uppercase;
         cursor: pointer;
         transition: all 0.3s ease;
@@ -70,10 +81,10 @@
       }
 
       /* -------------------------------------------------- */
-      /* THE STICKER BUTTON -- this is what we iterate on   */
+      /* Common button frame                                 */
       /* -------------------------------------------------- */
 
-      .sticker-btn {
+      .btn {
         position: relative;
         width: 260px;
         height: 80px;
@@ -82,13 +93,9 @@
         padding: 0;
         cursor: pointer;
         font-family: inherit;
-        /* perspective lives on the container so 3D transforms inside are real */
-        perspective: 700px;
-        perspective-origin: 50% 50%;
       }
 
-      /* Underneath layer -- what's revealed after the sticker is peeled off. */
-      .sticker-under {
+      .btn .under {
         position: absolute;
         inset: 0;
         display: flex;
@@ -97,117 +104,243 @@
         font-family: 'Cormorant Garamond', serif;
         font-weight: 500;
         font-size: 17px;
-        letter-spacing: 0.16em;
+        letter-spacing: 0.22em;
         color: var(--gold-bright);
-        text-shadow: 0 0 12px rgba(201, 162, 83, 0.5);
+        text-shadow: 0 0 14px rgba(201, 162, 83, 0.5);
         text-transform: uppercase;
       }
 
-      /* The sticker label sitting on top -- this is the thing that peels off.
-         Single element with a clip-path that animates a diagonal "still
-         stuck" region shrinking toward the bottom-left. The peeled-away
-         portion is filled in by .sticker-flap below. */
-      .sticker-front {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+      /* The sticker face — same look across all variants. */
+      .sticker-face {
         font-family: 'Cormorant Garamond', serif;
         font-weight: 600;
         font-size: 19px;
-        letter-spacing: 0.18em;
+        letter-spacing: 0.2em;
         color: #1a0508;
         text-transform: uppercase;
         background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
         border-radius: 14px;
         box-shadow:
           0 0 0 1px rgba(201, 162, 83, 0.7),
-          0 14px 30px rgba(201, 162, 83, 0.22),
+          0 12px 24px rgba(201, 162, 83, 0.2),
           inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        /* The "still stuck" region. At rest this is the full sticker. The
-           animation morphs this polygon: it shrinks toward bottom-left while
-           losing the top-right corner first. */
-        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
       }
 
-      /* The peeled-back flap. It's positioned where the original sticker
-         WOULD be, but rendered as the back of the sticker (different color,
-         subtle adhesive texture). The flap rotates in 3D so the top-right
-         corner appears to lift up and curl backward. */
-      .sticker-flap {
+      /* The back-of-sticker face — burgundy with subtle adhesive grid.
+         Used in variants A and C. */
+      .sticker-back-face {
+        background:
+          linear-gradient(135deg,
+            rgba(60, 18, 26, 1) 0%,
+            rgba(36, 12, 18, 0.98) 50%,
+            rgba(22, 8, 12, 0.96) 100%),
+          repeating-linear-gradient(45deg,
+            rgba(255, 255, 255, 0.02) 0 5px,
+            rgba(0, 0, 0, 0.05) 5px 10px);
+        background-blend-mode: overlay;
+        border-radius: 14px;
+        box-shadow:
+          0 0 0 1px rgba(201, 162, 83, 0.22),
+          inset 0 1px 0 rgba(201, 162, 83, 0.08);
+      }
+
+      /* ============================================================ */
+      /* VARIANT A — 3D Corner Peel                                    */
+      /*                                                                */
+      /* The top-left triangle (the "flap") lifts in 3D, rotating       */
+      /* around the anti-diagonal fold line. Front and back are         */
+      /* separate layers; the back is pre-rotated 180° around the same  */
+      /* axis so it shows when the flap passes 90°. backface-visibility */
+      /* hides each side when it faces away from the viewer.            */
+      /* ============================================================ */
+
+      .variant-a {
+        perspective: 800px;
+        perspective-origin: 50% 50%;
+      }
+      .variant-a .sticker {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        /* The still-stuck portion of the sticker. clip-path animates
+           from the full square down to the bottom-right point. */
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+      }
+      .variant-a .flap {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        /* Pivot on the anti-diagonal midpoint so the rotation axis IS
+           the anti-diagonal fold line. */
+        transform-origin: 50% 50%;
+        transform: rotate3d(1, -1, 0, 0deg);
+        pointer-events: none;
+      }
+      .variant-a .flap-front,
+      .variant-a .flap-back {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backface-visibility: hidden;
+        /* Both layers share the same clip-path showing the "lifted"
+           top-left region. */
+        clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%);
+      }
+      .variant-a .flap-back {
+        transform: rotate3d(1, -1, 0, 180deg);
+      }
+      .variant-a.peeling .sticker {
+        animation: a-sticker-shrink 1.7s cubic-bezier(0.45, 0.05, 0.5, 1) forwards;
+      }
+      .variant-a.peeling .flap {
+        animation: a-flap-rotate 1.7s cubic-bezier(0.45, 0.05, 0.5, 1) forwards;
+      }
+      .variant-a.peeling .flap-front,
+      .variant-a.peeling .flap-back {
+        animation: a-flap-clip 1.7s cubic-bezier(0.45, 0.05, 0.5, 1) forwards;
+      }
+
+      @keyframes a-sticker-shrink {
+        0%   { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); }
+        50%  { clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%); }
+        100% { clip-path: polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%); }
+      }
+      @keyframes a-flap-rotate {
+        0%   { transform: rotate3d(1, -1, 0, 0deg); }
+        100% { transform: rotate3d(1, -1, 0, 175deg); }
+      }
+      @keyframes a-flap-clip {
+        0%   { clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%); opacity: 1; }
+        50%  { clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 100%, 0% 100%); opacity: 1; }
+        90%  { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); opacity: 1; }
+        100% { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); opacity: 0; }
+      }
+
+      /* ============================================================ */
+      /* VARIANT B — 2D Diagonal Sweep with curl shading               */
+      /*                                                                */
+      /* No 3D. The gold sticker is wiped diagonally. The back-of-      */
+      /* sticker layer underneath has a gradient that brightens         */
+      /* toward the fold edge (simulates light catching a curled        */
+      /* surface) and darkens at the corner tip (the "shadowed" side    */
+      /* of the curl).                                                  */
+      /* ============================================================ */
+
+      .variant-b .sticker {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+        filter: drop-shadow(2px 2px 6px rgba(0, 0, 0, 0.45));
+      }
+      .variant-b .flap {
         position: absolute;
         inset: 0;
         border-radius: 14px;
-        /* Origin is the fold-line anchor: anti-diagonal pivot so the
-           top-right corner lifts and the bottom-left stays anchored. */
-        transform-origin: 0% 100%;
-        transform: rotate3d(1, 1, 0, 0deg);
-        /* The "lifted" portion -- starts as a tiny triangle at the top-right,
-           grows toward the bottom-left as the peel progresses. */
-        clip-path: polygon(100% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
-        background:
-          /* dim base coloring -- like the back of a label */
-          linear-gradient(135deg,
-            rgba(60, 18, 26, 0.97) 0%,
-            rgba(38, 12, 18, 0.95) 50%,
-            rgba(20, 6, 10, 0.93) 100%),
-          /* faint adhesive grid */
-          repeating-linear-gradient(45deg,
-            rgba(255, 255, 255, 0.018) 0 6px,
-            rgba(0, 0, 0, 0.05) 6px 12px);
-        background-blend-mode: overlay;
+        /* Diagonal gradient: dark at the TL corner (tip of the curl,
+           in shadow), brightening toward the BR side (where the fold
+           edge catches the light). */
+        background: linear-gradient(135deg,
+          rgba(20, 8, 12, 1) 0%,
+          rgba(40, 14, 22, 0.98) 25%,
+          rgba(72, 24, 36, 0.96) 55%,
+          rgba(120, 50, 70, 0.85) 85%,
+          rgba(180, 90, 110, 0.55) 100%);
+        clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%);
         box-shadow:
-          0 0 0 1px rgba(201, 162, 83, 0.25),
-          0 8px 22px rgba(0, 0, 0, 0.55);
+          inset 0 0 0 1px rgba(201, 162, 83, 0.22);
       }
-
-      /* Trigger: when the button is in .peeling state, both layers animate.
-         (Triggered by JS so we can re-run easily.) */
-      .sticker-btn.peeling .sticker-front {
-        animation: peel-front 1.6s cubic-bezier(0.4, 0.05, 0.4, 1) forwards;
+      /* The hairline highlight at the fold edge — a thin diagonal line
+         where the gold "edge" of the still-stuck sticker would catch
+         the light. Implemented as a pseudo-element with a thin gold
+         gradient stripe along the fold direction. */
+      .variant-b .flap::after {
+        content: '';
+        position: absolute;
+        inset: -2px;
+        border-radius: 14px;
+        background: linear-gradient(135deg,
+          transparent 48%,
+          rgba(230, 193, 119, 0.65) 50%,
+          transparent 52%);
+        clip-path: inherit;
+        pointer-events: none;
       }
-      .sticker-btn.peeling .sticker-flap {
-        animation: peel-flap 1.6s cubic-bezier(0.4, 0.05, 0.4, 1) forwards;
+      .variant-b.peeling .sticker {
+        animation: b-sticker 1.7s cubic-bezier(0.45, 0.05, 0.5, 1) forwards;
       }
-
-      /* The unpeeled portion shrinks from full square to the bottom-left
-         corner, sweeping its top-right corner off first. 5-vertex polygons
-         so the shape interpolates smoothly through the triangle phase. */
-      @keyframes peel-front {
-        0% {
-          clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+      .variant-b.peeling .flap {
+        animation: b-flap 1.7s cubic-bezier(0.45, 0.05, 0.5, 1) forwards;
+      }
+      @keyframes b-sticker {
+        0%   { clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%); }
+        50%  { clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%); }
+        100% { clip-path: polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%); }
+      }
+      @keyframes b-flap {
+        0%   {
+          clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%);
+          opacity: 1;
         }
-        50% {
-          /* bottom-left triangle */
-          clip-path: polygon(0% 0%, 0% 0%, 100% 100%, 0% 100%, 0% 100%);
+        50%  {
+          clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 100%, 0% 100%);
+          opacity: 1;
+        }
+        90%  {
+          clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+          opacity: 1;
         }
         100% {
-          /* collapsed to bottom-left point */
-          clip-path: polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%, 0% 100%);
-        }
-      }
-
-      /* The flap covers the peeled (top-right) region, rotating around the
-         anti-diagonal so it looks like the corner is curling up and back. */
-      @keyframes peel-flap {
-        0% {
-          /* degenerate triangle at top-right corner (invisible) */
-          clip-path: polygon(100% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
-          transform: rotate3d(1, 1, 0, 0deg);
-        }
-        50% {
-          /* top-right triangle has grown to cover half */
-          clip-path: polygon(100% 0%, 100% 100%, 100% 100%, 0% 0%, 0% 0%);
-          transform: rotate3d(1, 1, 0, 60deg);
-        }
-        100% {
-          /* full square, but rotated 175deg around the anti-diagonal so it
-             appears curled fully back -- backface basically out of view. */
           clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
-          transform: rotate3d(1, 1, 0, 175deg);
           opacity: 0;
         }
+      }
+
+      /* ============================================================ */
+      /* VARIANT C — Page-turn 3D flip around the right edge           */
+      /*                                                                */
+      /* Classic CSS card-flip. The whole sticker rotates around its    */
+      /* right edge — left edge lifts up and over. After 90° the back   */
+      /* shows; at 180° it has flipped fully.                           */
+      /* ============================================================ */
+
+      .variant-c {
+        perspective: 900px;
+        perspective-origin: 100% 50%;
+      }
+      .variant-c .card {
+        position: absolute;
+        inset: 0;
+        transform-style: preserve-3d;
+        transform-origin: 100% 50%;  /* right edge */
+        transform: rotateY(0deg);
+        pointer-events: none;
+      }
+      .variant-c .card-front,
+      .variant-c .card-back {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        backface-visibility: hidden;
+      }
+      .variant-c .card-back {
+        transform: rotateY(180deg);
+      }
+      .variant-c.peeling .card {
+        animation: c-card-flip 1.5s cubic-bezier(0.55, 0.05, 0.4, 1) forwards;
+      }
+      @keyframes c-card-flip {
+        0%   { transform: rotateY(0deg);                 opacity: 1; }
+        70%  { transform: rotateY(-160deg) translateX(-30%); opacity: 1; }
+        100% { transform: rotateY(-180deg) translateX(-60%); opacity: 0; }
       }
     </style>
   </head>
@@ -215,26 +348,51 @@
     <main class="lab">
       <h1>Peel Lab</h1>
 
-      <button class="sticker-btn" type="button" aria-label="Peel">
-        <div class="sticker-under">PEELED</div>
-        <div class="sticker-front">CLICK TO PEEL</div>
-        <div class="sticker-flap" aria-hidden="true"></div>
-      </button>
+      <section class="row">
+        <span class="label">A · 3D corner peel (rotation around fold)</span>
+        <button class="btn variant-a" type="button">
+          <span class="under">PEELED</span>
+          <span class="sticker sticker-face">CLICK A</span>
+          <span class="flap" aria-hidden="true">
+            <span class="flap-front sticker-face">CLICK A</span>
+            <span class="flap-back sticker-back-face"></span>
+          </span>
+        </button>
+      </section>
 
-      <button class="reset" type="button">Reset</button>
+      <section class="row">
+        <span class="label">B · 2D sweep with curl shading</span>
+        <button class="btn variant-b" type="button">
+          <span class="under">PEELED</span>
+          <span class="sticker sticker-face">CLICK B</span>
+          <span class="flap" aria-hidden="true"></span>
+        </button>
+      </section>
+
+      <section class="row">
+        <span class="label">C · Page-turn flip (right edge pivot)</span>
+        <button class="btn variant-c" type="button">
+          <span class="under">PEELED</span>
+          <span class="card">
+            <span class="card-front sticker-face">CLICK C</span>
+            <span class="card-back sticker-back-face"></span>
+          </span>
+        </button>
+      </section>
+
+      <button class="reset" type="button">Reset all</button>
     </main>
 
     <script>
-      const btn = document.querySelector('.sticker-btn');
-      const reset = document.querySelector('.reset');
-
-      btn.addEventListener('click', () => {
-        if (btn.classList.contains('peeling')) return;
-        btn.classList.add('peeling');
+      const buttons = document.querySelectorAll('.btn');
+      buttons.forEach((btn) => {
+        btn.addEventListener('click', () => {
+          if (btn.classList.contains('peeling')) return;
+          btn.classList.add('peeling');
+        });
       });
-
-      reset.addEventListener('click', () => {
-        btn.classList.remove('peeling');
+      document.querySelector('.reset').addEventListener('click', () => {
+        buttons.forEach((btn) => btn.classList.remove('peeling'));
       });
     </script>
   </body>
