@@ -446,15 +446,16 @@ input {
 
 /* peel-off animation: a card flips down from the top, revealing what's
    beneath. The center wheel-item becomes a stack of two layers. */
-/* Sticker peel adapted from reactbits.dev/animations/sticker-peel.
-   Three stacked layers:
-     1. .peel-bottom -- the new zone (always under everything)
-     2. .peel-main   -- the old zone label; clip-path's top edge animates
-        downward, progressively peeling the sticker away
-     3. .peel-flap   -- a mirrored "back of sticker" that follows the peel
-        line, sliding down with the fold so it looks like the lifted
-        portion is folded over the still-stuck portion
-   No 3D transforms; the illusion is pure 2D clip + mirror. */
+/* Diagonal sticker peel.
+   Fold line sweeps from top-left corner toward bottom-right corner along
+   the anti-diagonal. Three layers:
+     1. .peel-bottom -- the new zone, sits underneath
+     2. .peel-main   -- the old sticker, clip-path shrinks from full square
+        to the bottom-right triangle to a point at bottom-right
+     3. .peel-flap   -- a colored "back of sticker" panel positioned in the
+        peeled (top-left) region, fades out near the end
+   Five-vertex polygons throughout so the interpolation between full square,
+   triangle, and point stays smooth (the spare vertices coincide). */
 
 .peel-stack {
   position: absolute;
@@ -486,14 +487,11 @@ input {
     rgba(28, 8, 12, 0.98) 100%);
   border: 1px solid rgba(201, 162, 83, 0.42);
   border-radius: 3px;
-  /* Initial clip: full coverage (top edge at 0%, bottom edge below). */
-  clip-path: polygon(
-    -5px 0%,
-    calc(100% + 5px) 0%,
-    calc(100% + 5px) calc(100% + 5px),
-    -5px calc(100% + 5px)
-  );
-  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+  /* Initial: full square. Vertex layout (v1..v5) is chosen so that the
+     interpolation passes through bottom-right triangle (at 50%) and ends
+     at the bottom-right point (at 100%) -- see keyframes. */
+  clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+  filter: drop-shadow(2px 2px 5px rgba(0, 0, 0, 0.45));
 }
 .peel-main-inner {
   width: 100%;
@@ -510,79 +508,66 @@ input {
 
 .peel-flap {
   position: absolute;
-  width: 100%;
-  height: 100%;
-  left: 0;
-  top: calc(-100% - 5px);
+  inset: 0;
   z-index: 3;
   box-sizing: border-box;
-  transform: scaleY(-1);
   background:
-    linear-gradient(180deg,
-      rgba(36, 12, 18, 0.96) 0%,
-      rgba(24, 8, 12, 0.94) 100%),
+    linear-gradient(135deg,
+      rgba(40, 14, 22, 0.97) 0%,
+      rgba(24, 8, 12, 0.93) 100%),
     repeating-linear-gradient(
-      90deg,
+      135deg,
       rgba(255, 255, 255, 0.012) 0 6px,
       rgba(0, 0, 0, 0.04) 6px 12px);
   background-blend-mode: overlay;
   border: 1px solid rgba(201, 162, 83, 0.22);
   border-radius: 3px;
-  /* Initial clip: invisible -- degenerate polygon at the top edge. */
-  clip-path: polygon(
-    -5px -5px,
-    calc(100% + 5px) -5px,
-    calc(100% + 5px) -5px,
-    -5px -5px
-  );
-  filter: drop-shadow(0 -3px 6px rgba(0, 0, 0, 0.45));
+  /* Initial: degenerate polygon at top-left corner (invisible). */
+  clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%);
+  /* Drop-shadow follows the clip; offset toward bottom-right so the flap
+     looks like it's lifted off the surface, casting shadow onto the
+     remaining sticker. */
+  filter: drop-shadow(3px 3px 6px rgba(0, 0, 0, 0.5));
 }
 
-@keyframes peel-main-fold {
+@keyframes peel-main-diagonal {
   0% {
-    clip-path: polygon(
-      -5px 0%,
-      calc(100% + 5px) 0%,
-      calc(100% + 5px) calc(100% + 5px),
-      -5px calc(100% + 5px)
-    );
+    /* Full square: v1=TL, v2=TR, v3=BR, v4=BL, v5=TL (closes). */
+    clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+  }
+  50% {
+    /* Bottom-right triangle: v1=v2=TR, v3=BR, v4=v5=BL. */
+    clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%);
   }
   100% {
-    clip-path: polygon(
-      -5px 100%,
-      calc(100% + 5px) 100%,
-      calc(100% + 5px) calc(100% + 5px),
-      -5px calc(100% + 5px)
-    );
+    /* All vertices at BR -- nothing visible. */
+    clip-path: polygon(100% 100%, 100% 100%, 100% 100%, 100% 100%, 100% 100%);
   }
 }
 
-@keyframes peel-flap-fold {
+@keyframes peel-flap-diagonal {
   0% {
-    top: calc(-100% - 5px);
-    clip-path: polygon(
-      -5px -5px,
-      calc(100% + 5px) -5px,
-      calc(100% + 5px) -5px,
-      -5px -5px
-    );
+    /* All vertices at TL -- invisible. */
+    clip-path: polygon(0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%);
+    opacity: 1;
+  }
+  50% {
+    /* Top-left triangle (the peeled region): v1=TL, v2=v3=TR, v4=v5=BL. */
+    clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 100%, 0% 100%);
+    opacity: 1;
   }
   100% {
-    top: calc(100% - 1px);
-    clip-path: polygon(
-      -5px -5px,
-      calc(100% + 5px) -5px,
-      calc(100% + 5px) 100%,
-      -5px 100%
-    );
+    /* Same triangle but faded out -- "lifted off the slot". */
+    clip-path: polygon(0% 0%, 100% 0%, 100% 0%, 0% 100%, 0% 100%);
+    opacity: 0;
   }
 }
 
 .peel-stack.peeling .peel-main {
-  animation: peel-main-fold 2.0s cubic-bezier(0.5, 0.05, 0.5, 1) forwards;
+  animation: peel-main-diagonal 2.0s cubic-bezier(0.5, 0.05, 0.5, 1) forwards;
 }
 .peel-stack.peeling .peel-flap {
-  animation: peel-flap-fold 2.0s cubic-bezier(0.5, 0.05, 0.5, 1) forwards;
+  animation: peel-flap-diagonal 2.0s cubic-bezier(0.5, 0.05, 0.5, 1) forwards;
 }
 
 .marathon-footer {
