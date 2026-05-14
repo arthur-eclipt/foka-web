@@ -2,159 +2,240 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
-    <meta name="theme-color" content="#0a0306" />
-    <title>FOKA · Touch Marathon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+    <title>Peel Lab</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" />
-    <link rel="stylesheet" href="styles.css" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@500;600&display=swap" />
+    <style>
+      :root {
+        --gold:        #c9a253;
+        --gold-bright: #e6c177;
+        --burgundy:    #4a0d18;
+        --burgundy-deep: #2c0810;
+        --bg-dark:     #160508;
+        --ink:         #f4e4c1;
+
+        /* Knob: where the peel anchors on the sticker. Tweak per iteration.
+           Other directions to try: 'br' (bottom-right), 'tl' (top-left). */
+        --anchor: 'tr';
+      }
+
+      * { box-sizing: border-box; }
+      html, body {
+        margin: 0;
+        height: 100%;
+        background:
+          radial-gradient(ellipse at center, #220a10 0%, var(--bg-dark) 70%);
+        font-family: 'Inter', system-ui, sans-serif;
+        color: var(--ink);
+        display: grid;
+        place-items: center;
+        overflow: hidden;
+        touch-action: manipulation;
+      }
+
+      .lab {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 32px;
+      }
+      .lab h1 {
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 500;
+        font-size: 20px;
+        letter-spacing: 0.08em;
+        color: rgba(244, 228, 193, 0.55);
+        margin: 0;
+        text-transform: uppercase;
+      }
+      .reset {
+        margin-top: 12px;
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 14px;
+        background: none;
+        color: rgba(244, 228, 193, 0.55);
+        border: 1px solid rgba(244, 228, 193, 0.2);
+        padding: 8px 18px;
+        border-radius: 999px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+      .reset:hover {
+        color: var(--gold);
+        border-color: rgba(201, 162, 83, 0.4);
+      }
+
+      /* -------------------------------------------------- */
+      /* THE STICKER BUTTON -- this is what we iterate on   */
+      /* -------------------------------------------------- */
+
+      .sticker-btn {
+        position: relative;
+        width: 260px;
+        height: 80px;
+        border: none;
+        background: none;
+        padding: 0;
+        cursor: pointer;
+        font-family: inherit;
+        /* perspective lives on the container so 3D transforms inside are real */
+        perspective: 700px;
+        perspective-origin: 50% 50%;
+      }
+
+      /* Underneath layer -- what's revealed after the sticker is peeled off. */
+      .sticker-under {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 500;
+        font-size: 17px;
+        letter-spacing: 0.16em;
+        color: var(--gold-bright);
+        text-shadow: 0 0 12px rgba(201, 162, 83, 0.5);
+        text-transform: uppercase;
+      }
+
+      /* The sticker label sitting on top -- this is the thing that peels off.
+         Single element with a clip-path that animates a diagonal "still
+         stuck" region shrinking toward the bottom-left. The peeled-away
+         portion is filled in by .sticker-flap below. */
+      .sticker-front {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: 'Cormorant Garamond', serif;
+        font-weight: 600;
+        font-size: 19px;
+        letter-spacing: 0.18em;
+        color: #1a0508;
+        text-transform: uppercase;
+        background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
+        border-radius: 14px;
+        box-shadow:
+          0 0 0 1px rgba(201, 162, 83, 0.7),
+          0 14px 30px rgba(201, 162, 83, 0.22),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        /* The "still stuck" region. At rest this is the full sticker. The
+           animation morphs this polygon: it shrinks toward bottom-left while
+           losing the top-right corner first. */
+        clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+      }
+
+      /* The peeled-back flap. It's positioned where the original sticker
+         WOULD be, but rendered as the back of the sticker (different color,
+         subtle adhesive texture). The flap rotates in 3D so the top-right
+         corner appears to lift up and curl backward. */
+      .sticker-flap {
+        position: absolute;
+        inset: 0;
+        border-radius: 14px;
+        /* Origin is the fold-line anchor: anti-diagonal pivot so the
+           top-right corner lifts and the bottom-left stays anchored. */
+        transform-origin: 0% 100%;
+        transform: rotate3d(1, 1, 0, 0deg);
+        /* The "lifted" portion -- starts as a tiny triangle at the top-right,
+           grows toward the bottom-left as the peel progresses. */
+        clip-path: polygon(100% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
+        background:
+          /* dim base coloring -- like the back of a label */
+          linear-gradient(135deg,
+            rgba(60, 18, 26, 0.97) 0%,
+            rgba(38, 12, 18, 0.95) 50%,
+            rgba(20, 6, 10, 0.93) 100%),
+          /* faint adhesive grid */
+          repeating-linear-gradient(45deg,
+            rgba(255, 255, 255, 0.018) 0 6px,
+            rgba(0, 0, 0, 0.05) 6px 12px);
+        background-blend-mode: overlay;
+        box-shadow:
+          0 0 0 1px rgba(201, 162, 83, 0.25),
+          0 8px 22px rgba(0, 0, 0, 0.55);
+      }
+
+      /* Trigger: when the button is in .peeling state, both layers animate.
+         (Triggered by JS so we can re-run easily.) */
+      .sticker-btn.peeling .sticker-front {
+        animation: peel-front 1.6s cubic-bezier(0.4, 0.05, 0.4, 1) forwards;
+      }
+      .sticker-btn.peeling .sticker-flap {
+        animation: peel-flap 1.6s cubic-bezier(0.4, 0.05, 0.4, 1) forwards;
+      }
+
+      /* The unpeeled portion shrinks from full square to the bottom-left
+         corner, sweeping its top-right corner off first. 5-vertex polygons
+         so the shape interpolates smoothly through the triangle phase. */
+      @keyframes peel-front {
+        0% {
+          clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+        }
+        50% {
+          /* bottom-left triangle */
+          clip-path: polygon(0% 0%, 0% 0%, 100% 100%, 0% 100%, 0% 100%);
+        }
+        100% {
+          /* collapsed to bottom-left point */
+          clip-path: polygon(0% 100%, 0% 100%, 0% 100%, 0% 100%, 0% 100%);
+        }
+      }
+
+      /* The flap covers the peeled (top-right) region, rotating around the
+         anti-diagonal so it looks like the corner is curling up and back. */
+      @keyframes peel-flap {
+        0% {
+          /* degenerate triangle at top-right corner (invisible) */
+          clip-path: polygon(100% 0%, 100% 0%, 100% 0%, 100% 0%, 100% 0%);
+          transform: rotate3d(1, 1, 0, 0deg);
+        }
+        50% {
+          /* top-right triangle has grown to cover half */
+          clip-path: polygon(100% 0%, 100% 100%, 100% 100%, 0% 0%, 0% 0%);
+          transform: rotate3d(1, 1, 0, 60deg);
+        }
+        100% {
+          /* full square, but rotated 175deg around the anti-diagonal so it
+             appears curled fully back -- backface basically out of view. */
+          clip-path: polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%);
+          transform: rotate3d(1, 1, 0, 175deg);
+          opacity: 0;
+        }
+      }
+    </style>
   </head>
   <body>
-    <div class="rotate-prompt" aria-hidden="true">
-      <div class="rotate-icon">⟳</div>
-      <div class="rotate-heading">Rotate your device</div>
-      <div class="rotate-body">Touch Marathon is designed for landscape.</div>
-    </div>
+    <main class="lab">
+      <h1>Peel Lab</h1>
 
-    <main id="app" class="app">
-      <!-- SCREEN 1: Splash -->
-      <section class="screen splash" data-screen="splash" aria-hidden="false">
-        <div class="splash-mark">
-          <span class="mark-glyph">∞</span>
-          <span class="mark-name">Touch Marathon</span>
-        </div>
-      </section>
+      <button class="sticker-btn" type="button" aria-label="Peel">
+        <div class="sticker-under">PEELED</div>
+        <div class="sticker-front">CLICK TO PEEL</div>
+        <div class="sticker-flap" aria-hidden="true"></div>
+      </button>
 
-      <!-- SCREENS 2–5: Intro Title + Prep 2.1 / 2.2 / 2.3 -->
-      <section class="screen intro" data-screen="intro" aria-hidden="true">
-        <header class="topbar">
-          <div class="brand-mark">
-            <span class="mark-glyph">∞</span>
-            <span class="mark-name">Touch Marathon</span>
-          </div>
-          <div class="intro-dots" aria-hidden="true">
-            <span class="dot" data-dot="0"></span>
-            <span class="dot" data-dot="1"></span>
-            <span class="dot" data-dot="2"></span>
-            <span class="dot" data-dot="3"></span>
-          </div>
-        </header>
-        <div class="intro-body">
-          <h1 class="intro-title"></h1>
-          <p class="intro-subtitle"></p>
-          <div class="intro-flag"></div>
-          <div class="intro-copy"></div>
-        </div>
-        <footer class="intro-footer">
-          <button class="btn btn-primary intro-next" type="button">Next</button>
-        </footer>
-      </section>
-
-      <!-- SCREEN 5: Marathon -->
-      <section class="screen marathon" data-screen="marathon" aria-hidden="true">
-        <div class="marathon-bg" aria-hidden="true"></div>
-
-        <header class="topbar marathon-topbar">
-          <div class="brand-mark">
-            <span class="mark-glyph">∞</span>
-            <span class="mark-name">Touch Marathon</span>
-          </div>
-          <div class="header-ticker" aria-live="polite">
-            <span class="header-msg"></span>
-          </div>
-        </header>
-
-        <div class="wheels" aria-label="Three slot machine wheels">
-          <div class="wheel" data-wheel="1">
-            <div class="wheel-viewport">
-              <div class="wheel-strip"></div>
-            </div>
-            <div class="wheel-focus" aria-hidden="true"></div>
-          </div>
-          <div class="wheel" data-wheel="2">
-            <div class="wheel-viewport">
-              <div class="wheel-strip"></div>
-            </div>
-            <div class="wheel-focus" aria-hidden="true"></div>
-          </div>
-          <div class="wheel" data-wheel="3">
-            <div class="wheel-viewport">
-              <div class="wheel-strip"></div>
-            </div>
-            <div class="wheel-focus" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <footer class="marathon-footer">
-          <div class="timer">
-            <div class="timer-track">
-              <div class="timer-fill"></div>
-            </div>
-          </div>
-          <button class="btn btn-spin" type="button" disabled>Spin</button>
-        </footer>
-
-        <!-- Part 4 in-game overlay: fades after a few seconds -->
-        <div class="game-overlay" aria-hidden="true">
-          <div class="game-overlay-inner">
-            <div class="game-overlay-heading"></div>
-            <div class="game-overlay-body"></div>
-          </div>
-        </div>
-      </section>
-
-      <!-- SCREEN: Semi-Final (Beta opt-in / email capture) -->
-      <section class="screen semi-final" data-screen="semi-final" aria-hidden="true">
-        <header class="topbar">
-          <div class="brand-mark">
-            <span class="mark-glyph">∞</span>
-            <span class="mark-name">Touch Marathon</span>
-          </div>
-        </header>
-        <div class="semi-final-body">
-          <h1 class="semi-final-heading"></h1>
-          <div class="semi-final-copy"></div>
-          <form class="semi-final-form" novalidate>
-            <div class="semi-final-input-row">
-              <input
-                id="semi-final-email"
-                class="semi-final-input"
-                type="email"
-                inputmode="email"
-                autocomplete="email"
-                spellcheck="false"
-                placeholder=""
-                required
-              />
-              <button class="btn btn-primary semi-final-submit" type="submit">Notify Me</button>
-            </div>
-            <label class="semi-final-consent">
-              <input type="checkbox" class="semi-final-consent-box" required />
-              <span class="semi-final-consent-text"></span>
-            </label>
-            <div class="semi-final-feedback" role="status" aria-live="polite"></div>
-          </form>
-          <div class="semi-final-teaser"></div>
-        </div>
-      </section>
-
-      <!-- SCREEN: Final (post-submit thank-you) -->
-      <section class="screen final" data-screen="final" aria-hidden="true">
-        <header class="topbar">
-          <div class="brand-mark">
-            <span class="mark-glyph">∞</span>
-            <span class="mark-name">Touch Marathon</span>
-          </div>
-        </header>
-        <div class="final-body">
-          <h1 class="final-heading"></h1>
-          <div class="final-copy"></div>
-        </div>
-      </section>
+      <button class="reset" type="button">Reset</button>
     </main>
 
-    <script src="content.js"></script>
-    <script src="script.js"></script>
+    <script>
+      const btn = document.querySelector('.sticker-btn');
+      const reset = document.querySelector('.reset');
+
+      btn.addEventListener('click', () => {
+        if (btn.classList.contains('peeling')) return;
+        btn.classList.add('peeling');
+      });
+
+      reset.addEventListener('click', () => {
+        btn.classList.remove('peeling');
+      });
+    </script>
   </body>
 </html>
