@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node --check c:/repos/foka-web/script.js)",
+      "Bash(node --check c:/repos/foka-web/content.js)"
+    ]
+  }
+}

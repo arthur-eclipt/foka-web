@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
     <meta name="theme-color" content="#0a0306" />
-    <title>FOKA · Marathon</title>
+    <title>FOKA · Touch Marathon</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" />
@@ -14,7 +14,7 @@
     <div class="rotate-prompt" aria-hidden="true">
       <div class="rotate-icon">⟳</div>
       <div class="rotate-heading">Rotate your device</div>
-      <div class="rotate-body">Marathon is designed for landscape.</div>
+      <div class="rotate-body">Touch Marathon is designed for landscape.</div>
     </div>
 
     <main id="app" class="app">
@@ -22,21 +22,22 @@
       <section class="screen splash" data-screen="splash" aria-hidden="false">
         <div class="splash-mark">
           <span class="mark-glyph">∞</span>
-          <span class="mark-name">Marathon</span>
+          <span class="mark-name">Touch Marathon</span>
         </div>
       </section>
 
-      <!-- SCREENS 2–4: Intro 1, 2, 3 -->
+      <!-- SCREENS 2–5: Intro Title + Prep 2.1 / 2.2 / 2.3 -->
       <section class="screen intro" data-screen="intro" aria-hidden="true">
         <header class="topbar">
           <div class="brand-mark">
             <span class="mark-glyph">∞</span>
-            <span class="mark-name">Marathon</span>
+            <span class="mark-name">Touch Marathon</span>
           </div>
           <div class="intro-dots" aria-hidden="true">
             <span class="dot" data-dot="0"></span>
             <span class="dot" data-dot="1"></span>
             <span class="dot" data-dot="2"></span>
+            <span class="dot" data-dot="3"></span>
           </div>
         </header>
         <div class="intro-body">
@@ -57,7 +58,7 @@
         <header class="topbar marathon-topbar">
           <div class="brand-mark">
             <span class="mark-glyph">∞</span>
-            <span class="mark-name">Marathon</span>
+            <span class="mark-name">Touch Marathon</span>
           </div>
           <div class="header-ticker" aria-live="polite">
             <span class="header-msg"></span>
@@ -71,13 +72,13 @@
             </div>
             <div class="wheel-focus" aria-hidden="true"></div>
           </div>
-          <div class="wheel" data-wheel="3">
+          <div class="wheel" data-wheel="2">
             <div class="wheel-viewport">
               <div class="wheel-strip"></div>
             </div>
             <div class="wheel-focus" aria-hidden="true"></div>
           </div>
-          <div class="wheel" data-wheel="2">
+          <div class="wheel" data-wheel="3">
             <div class="wheel-viewport">
               <div class="wheel-strip"></div>
             </div>
@@ -103,33 +104,52 @@
         </div>
       </section>
 
-      <!-- SCREEN 6: Final -->
+      <!-- SCREEN: Semi-Final (Beta opt-in / email capture) -->
+      <section class="screen semi-final" data-screen="semi-final" aria-hidden="true">
+        <header class="topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Touch Marathon</span>
+          </div>
+        </header>
+        <div class="semi-final-body">
+          <h1 class="semi-final-heading"></h1>
+          <div class="semi-final-copy"></div>
+          <form class="semi-final-form" novalidate>
+            <div class="semi-final-input-row">
+              <input
+                id="semi-final-email"
+                class="semi-final-input"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                spellcheck="false"
+                placeholder=""
+                required
+              />
+              <button class="btn btn-primary semi-final-submit" type="submit">Notify Me</button>
+            </div>
+            <label class="semi-final-consent">
+              <input type="checkbox" class="semi-final-consent-box" required />
+              <span class="semi-final-consent-text"></span>
+            </label>
+            <div class="semi-final-feedback" role="status" aria-live="polite"></div>
+          </form>
+          <div class="semi-final-teaser"></div>
+        </div>
+      </section>
+
+      <!-- SCREEN: Final (post-submit thank-you) -->
       <section class="screen final" data-screen="final" aria-hidden="true">
         <header class="topbar">
           <div class="brand-mark">
             <span class="mark-glyph">∞</span>
-            <span class="mark-name">Marathon</span>
+            <span class="mark-name">Touch Marathon</span>
           </div>
         </header>
         <div class="final-body">
           <h1 class="final-heading"></h1>
           <div class="final-copy"></div>
-          <form class="final-form" novalidate>
-            <label class="final-label" for="final-email"></label>
-            <div class="final-input-row">
-              <input
-                id="final-email"
-                class="final-input"
-                type="email"
-                inputmode="email"
-                autocomplete="email"
-                spellcheck="false"
-                required
-              />
-              <button class="btn btn-primary final-submit" type="submit">Notify Me</button>
-            </div>
-            <div class="final-feedback" role="status" aria-live="polite"></div>
-          </form>
         </div>
       </section>
     </main>

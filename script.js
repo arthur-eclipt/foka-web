@@ -17,15 +17,16 @@
   const state = {
     screen: 'splash',
     introIdx: 0,
+    firstSpin: true,                    // first SPIN swaps from initial display
     w1Items: CONTENT.wheels.w1.slice(),
     w2Items: CONTENT.wheels.w2.slice(),
-    w3Wheel: G1.slice(),               // 6 active letters on Wheel 3
-    w3Queue: [...G2, ...G3],           // letters waiting to peel in
+    w3Wheel: G1.slice(),                // 6 active zones on Wheel 3
+    w3Queue: [...G2, ...G3],            // zones waiting to peel in
     w1History: [],
     w2History: [],
-    w2AntiStreak: 0,                    // remaining forced-opposite spins
-    w2AntiStreakBan: null,              // the index banned during anti-streak
-    w3ForcedPick: null,                 // letter that must win the next W3 spin
+    w2AntiStreak: 0,
+    w2AntiStreakBan: null,
+    w3ForcedPick: null,
     spinning: false,
     cooldownTimers: [],
     headerTimer: null,
@@ -403,9 +404,16 @@
     showInGameOverlay();
     startHeaderTicker();
 
-    state.w1 = new Wheel(document.querySelector('[data-wheel="1"]'), state.w1Items);
-    state.w2 = new Wheel(document.querySelector('[data-wheel="2"]'), state.w2Items);
-    state.w3 = new Wheel(document.querySelector('[data-wheel="3"]'), state.w3Wheel);
+    // Wheels start with the title display ("The | Touch | Marathon" centered).
+    // The first SPIN swaps each wheel to its real game items mid-animation.
+    const init = CONTENT.wheels.initialDisplay;
+    state.w1 = new Wheel(document.querySelector('[data-wheel="1"]'), init.w1);
+    state.w2 = new Wheel(document.querySelector('[data-wheel="2"]'), init.w2);
+    state.w3 = new Wheel(document.querySelector('[data-wheel="3"]'), init.w3);
+    // Each initialDisplay has 3 items; center idx is 1.
+    state.w1.currentIdx = 1; state.w1.renderIdle();
+    state.w2.currentIdx = 1; state.w2.renderIdle();
+    state.w3.currentIdx = 1; state.w3.renderIdle();
 
     // Enable spin after a moment so the overlay has stage time.
     setTimeout(() => setSpinEnabled(true), 1200);
@@ -422,9 +430,10 @@
       body.appendChild(p);
     });
     setTimeout(() => overlay.classList.add('visible'), 180);
+    // Spec: "After 6 seconds the text will slowly fade away..."
     state.overlayTimer = setTimeout(() => {
       overlay.classList.remove('visible');
-    }, 5200);
+    }, 6000);
   }
 
   function setSpinEnabled(on) {
@@ -447,10 +456,28 @@
   // ------------------------------------------------------------------
   // Spin sequence
   // ------------------------------------------------------------------
+  // Cooldown total (ms) from wheel-stop to SPIN reactivation.
+  // Cosmin (2026-05-14): reduce to 3-5s for fluid PoC testing.
+  const COOLDOWN_MS = 4000;
+  // Bar starts a little after wheels stop so the result has a beat to land.
+  const BAR_START_MS = 1500;
+
   async function runSpin() {
     state.spinning = true;
     setSpinEnabled(false);
     clearCooldownTimers();
+
+    // On the very first spin, swap each wheel from initial display to its
+    // real game items. The strip rebuild inside .spin() will repaint cleanly.
+    if (state.firstSpin) {
+      state.w1.setItems(state.w1Items);
+      state.w2.setItems(state.w2Items);
+      state.w3.setItems(state.w3Wheel);
+      state.w1.currentIdx = 0;
+      state.w2.currentIdx = 0;
+      state.w3.currentIdx = 0;
+      state.firstSpin = false;
+    }
 
     const w1Idx = pickWheel1();
     const w2Idx = pickWheel2();
@@ -461,10 +488,9 @@
     fill.style.transition = 'none';
     fill.style.width = '0%';
 
-    // Durations chosen so:
-    //  - W1 stops first
-    //  - W3 stops in the middle, slightly slower per-rotation than W1
-    //  - W2 stops last, with faster per-rotation cadence
+    // Durations:
+    //   W1 stops first; W3 stops mid (slightly slower per-rotation than W1);
+    //   W2 stops last (narrower + faster per-rotation cadence).
     const p1 = state.w1.spin(w1Idx, 2800, state.audio, 'cubic-bezier(0.15, 0.78, 0.25, 1)', 6);
     const p3 = state.w3.spin(w3Idx, 3700, state.audio, 'cubic-bezier(0.18, 0.75, 0.22, 1)', 5);
     const p2 = state.w2.spin(w2Idx, 4500, state.audio, 'cubic-bezier(0.12, 0.82, 0.22, 1)', 10);
@@ -480,34 +506,32 @@
     await sleep(180);
     document.querySelector('.wheels').classList.add('sentence-formed');
 
-    // Hold the sentence moment.
-    await sleep(1400);
+    // Hold the sentence moment (shorter to keep the 4s cooldown fluid).
+    await sleep(900);
 
-    // Peel off Wheel 3's centered (winning) letter and reveal the next from queue.
+    // Peel off Wheel 3's centered (winning) zone and reveal the next from queue.
     const oldText = state.w3.items[w3Idx];
     const replacement = state.w3Queue.shift();
     if (replacement === undefined) {
-      await transitionToFinal();
+      await transitionToSemiFinal();
       return;
     }
     const isEnding = (replacement === G3[0]);
 
-    // Start the peel-off, but don't await yet -- the cooldown bar must begin
-    // filling at t=3s from wheel-stop, which can overlap the tail end of the
-    // peel animation.
+    // Peel-off runs in parallel with the cooldown bar.
     const peelPromise = peelOff(state.w3, oldText, replacement);
 
     if (!isEnding) {
       const sinceStop = performance.now() - tStop;
-      const fillStartIn = Math.max(0, 3000 - sinceStop);
+      const fillStartIn = Math.max(0, BAR_START_MS - sinceStop);
       const tFillStart = setTimeout(() => {
-        const remaining = Math.max(800, tStop + 30000 - performance.now());
+        const remaining = Math.max(400, tStop + COOLDOWN_MS - performance.now());
         fill.style.transition = `width ${remaining}ms linear`;
         fill.style.width = '100%';
       }, fillStartIn);
       state.cooldownTimers.push(tFillStart);
 
-      const enableIn = Math.max(0, tStop + 30000 - performance.now());
+      const enableIn = Math.max(0, tStop + COOLDOWN_MS - performance.now());
       const tEnable = setTimeout(() => {
         state.spinning = false;
         setSpinEnabled(true);
@@ -525,10 +549,10 @@
 
     // PoC ending: Inner Thighs has just been peeled in.
     if (isEnding) {
-      // Per brief 5.7: "No header cycling during this beat".
+      // No header cycling during this beat.
       stopHeaderTicker();
       await sleep(1700);
-      await transitionToFinal();
+      await transitionToSemiFinal();
       return;
     }
 
@@ -572,59 +596,88 @@
   }
 
   // ------------------------------------------------------------------
-  // Final screen
+  // Semi-Final (beta opt-in) and Final (welcome) screens
   // ------------------------------------------------------------------
-  async function transitionToFinal() {
+  async function transitionToSemiFinal() {
     stopHeaderTicker();
     if (state.overlayTimer) clearTimeout(state.overlayTimer);
     clearCooldownTimers();
-    renderFinal();
-    showScreen('final');
+    renderSemiFinal();
+    showScreen('semi-final');
+  }
+
+  function renderSemiFinal() {
+    const el = document.querySelector('.semi-final');
+    el.querySelector('.semi-final-heading').textContent = CONTENT.semiFinal.heading;
+    const copy = el.querySelector('.semi-final-copy');
+    copy.innerHTML = '';
+    CONTENT.semiFinal.body.forEach((line, i) => {
+      const p = document.createElement('p');
+      p.textContent = line;
+      // Emphasize lines 2 and 4 ("Join us as an official Beta tester." /
+      // "Zero spam, just pure adrenaline.")
+      if (i === 1 || i === 3) p.classList.add('strong');
+      copy.appendChild(p);
+    });
+    const input = el.querySelector('.semi-final-input');
+    input.placeholder = CONTENT.semiFinal.cta.placeholder;
+    el.querySelector('.semi-final-submit').textContent = CONTENT.semiFinal.cta.button;
+    el.querySelector('.semi-final-consent-text').textContent = CONTENT.semiFinal.cta.consent;
+    el.querySelector('.semi-final-teaser').textContent = CONTENT.semiFinal.teaser;
+    const feedback = el.querySelector('.semi-final-feedback');
+    feedback.textContent = '';
+    feedback.classList.remove('error');
+    el.classList.remove('submitted');
+    input.value = '';
+    el.querySelector('.semi-final-consent-box').checked = false;
   }
 
   function renderFinal() {
-    const finalEl = document.querySelector('.final');
-    finalEl.querySelector('.final-heading').textContent = CONTENT.final.heading;
-    const copy = finalEl.querySelector('.final-copy');
+    const el = document.querySelector('.final');
+    el.querySelector('.final-heading').textContent = CONTENT.final.heading;
+    const copy = el.querySelector('.final-copy');
     copy.innerHTML = '';
     CONTENT.final.body.forEach((line) => {
       const p = document.createElement('p');
       p.textContent = line;
       copy.appendChild(p);
     });
-    finalEl.querySelector('.final-label').textContent = CONTENT.final.cta.label;
-    const input = finalEl.querySelector('.final-input');
-    input.placeholder = CONTENT.final.cta.placeholder;
-    finalEl.querySelector('.final-submit').textContent = CONTENT.final.cta.button;
-    const feedback = finalEl.querySelector('.final-feedback');
-    feedback.textContent = '';
-    feedback.classList.remove('success', 'error');
-    finalEl.classList.remove('submitted');
   }
 
-  function attachFinalHandler() {
-    const finalEl = document.querySelector('.final');
-    finalEl.querySelector('.final-form').addEventListener('submit', (e) => {
+  function attachSemiFinalHandler() {
+    const el = document.querySelector('.semi-final');
+    el.querySelector('.semi-final-form').addEventListener('submit', (e) => {
       e.preventDefault();
-      const input = finalEl.querySelector('.final-input');
-      const feedback = finalEl.querySelector('.final-feedback');
+      const input = el.querySelector('.semi-final-input');
+      const consentBox = el.querySelector('.semi-final-consent-box');
+      const feedback = el.querySelector('.semi-final-feedback');
       const email = input.value.trim();
       const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      feedback.classList.remove('success', 'error');
+      feedback.classList.remove('error');
       if (!ok) {
-        feedback.textContent = CONTENT.final.cta.error;
+        feedback.textContent = CONTENT.semiFinal.cta.error;
+        feedback.classList.add('error');
+        return;
+      }
+      if (!consentBox.checked) {
+        feedback.textContent = CONTENT.semiFinal.cta.consentError;
         feedback.classList.add('error');
         return;
       }
       try {
         const raw = localStorage.getItem('foka_subscribers');
         const list = raw ? JSON.parse(raw) : [];
-        list.push({ email: email, timestamp: new Date().toISOString() });
+        list.push({
+          email: email,
+          consent: true,
+          timestamp: new Date().toISOString(),
+        });
         localStorage.setItem('foka_subscribers', JSON.stringify(list));
       } catch (e) { /* localStorage may be disabled */ }
-      feedback.textContent = CONTENT.final.cta.success;
-      feedback.classList.add('success');
-      finalEl.classList.add('submitted');
+      el.classList.add('submitted');
+      renderFinal();
+      // Small beat between screens so the user registers the submit.
+      setTimeout(() => showScreen('final'), 450);
     });
   }
 
@@ -642,7 +695,7 @@
 
     attachIntroHandlers();
     attachSpinHandler();
-    attachFinalHandler();
+    attachSemiFinalHandler();
 
     // First user gesture unlocks audio.
     const initAudio = () => {

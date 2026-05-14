@@ -1,114 +1,132 @@
-// Placeholder copy from Cosmin's content draft. Word counts and lengths match
-// the final version so layout decisions transfer cleanly. Final copy will be
-// dropped in here without changes to markup or styles.
+// Final copy from Cosmin (2026-05-14 update). Swapping placeholder strings
+// for production wording; structure here matches script.js / index.html.
 
 const CONTENT = {
   brand: {
-    mark: '∞',          // infinity glyph
-    name: 'Marathon',
+    mark: '∞',
+    name: 'Touch Marathon',
   },
 
   splash: {
-    // logo + name only; no body copy
-    name: 'Marathon',
+    name: 'Touch Marathon',
   },
 
+  // 4 intro stages: Title → Reset → Setting/Outfit → Golden Rule.
+  // (Spec splits old "Before you begin" into screens 2.1, 2.2, 2.3 plus the
+  //  title screen with the OK button.)
   intro: [
     {
-      title: 'Marathon',
-      subtitle: 'The endless marathon.',
+      title: 'Touch Marathon',
+      subtitle: 'The endless caress.',
+      flag: '',
+      body: [
+        'This is a game for adult couples.',
+      ],
+      button: 'OK',
+    },
+    {
+      title: 'Touch Marathon',
+      subtitle: 'The endless caress.',
       flag: 'Before you begin…',
       body: [
-        "Kdwim vgz qjov oy kda xhm og vda lwwf. Gmwdf Kmdsqvzx gfv’v mbmwa opbmh; vg’v mbmwa pbmhf xndfbmv.",
-        "The Reset: M vbgf fvbifg mf vbg \"ibvmebhg\" igviffs emjmx xfgh rme jvjbfmbt.",
+        'The Reset: A warm shower is the "boundary" between daily life and intimacy.',
+        'Leave the rush of the day at the door. Touch Marathon isn’t about speed; it’s about being present.',
       ],
-      button: 'Next',
+      button: 'Continue',
     },
     {
-      title: 'Marathon',
-      subtitle: 'The endless marathon.',
+      title: 'Touch Marathon',
+      subtitle: 'The endless caress.',
+      flag: '',
       body: [
-        "The Outfit: Lpduv ef jxhulqj rltky, dshmkwubvep asbwkhv gksv isnu bxd mbbc dwwudfwlyh. Ldyru kkh syvshlv vy glvfrzhulqj bxdv tnlq, rbvhu eb rbvhu.",
-        "Rule: Vj yf lkxo pf klsfnmo, fsvf jnxid bi hmwvjshm gvlk ch bmdszmo cmipim vkshvjshm.",
+        'The Setting: Dim the lights, play your favorite music, and make sure you won’t be interrupted.',
+        'The Outfit: Start by wearing light, comfortable clothes that make you feel attractive. Savor the process of discovering your skin, layer by layer.',
+        'Are you ready to rediscover each other through touch?',
       ],
-      button: 'Next',
+      button: 'We are ready',
     },
     {
-      title: 'Marathon',
-      subtitle: 'The endless marathon.',
+      title: 'Touch Marathon',
+      subtitle: 'The endless caress.',
+      flag: '',
       body: [
-        "The Setting: Gzo vhe rwbvhy, xskm lhwv vmxkyrvu mwhzd, mof tkmv hfky lhw mwf’u hf qbmvbyyvghm.",
-        "The Connection: Vzqrezyr ppr dzyvngv zg qxsh zg lwaaxlsf kshxdmzkzf vhe kshf. Slszvur zg vhe rwvf dbeivf. Zve ksvzf z qvff lsuzvlr rwb hffz fvdr kv.",
+        'The Golden Rule: If an area is covered, that piece of clothing must be removed before touching. Every touch must be slow. Do not rush; savor the anticipation.',
       ],
       button: 'Start Marathon',
     },
   ],
 
-  // 4th onboarding fragment: appears as an overlay on the Marathon screen at
-  // start, fades away after a few seconds.
+  // In-game overlay (Part 4 / "The Connection"). Fades after ~6s.
   overlay: {
-    heading: 'The Golden Rule',
+    heading: 'The Connection',
     body: [
-      "Xptmy kfswd qvlk yf lsqm. Qz rfi gswd; xmtpi vhe mrvzdizbsvzd.",
-      "Are you ready to rediscover each other?",
+      'Maintain eye contact as much as possible throughout the game.',
+      'Breathe in the same rhythm. And steal a kiss whenever you feel like it.',
     ],
   },
 
-  // Header strip on the Marathon screen, cycles every 5s, never stops.
+  // Cycling header messages on the Marathon screen.
   headerMessages: [
-    'Pshashsh fbh dshshshsh sh fshsh fh dshshshsh!',
-    'Xnbdi fbi lrpv. Lm rz’v sv fbi nzh, dzhf rd bmm!',
-    'Gfbi qz gbwf. Zbt’f nzhh; fbi fbhvdrb mxtpf!',
-    'Vpwzl b dshv jshshshsh ksh shshl shshsh sh!',
+    'Maintain eye contact as much as possible!',
+    'Touch the skin. If it’s in the way, take it off!',
+    'Slow is sexy. Don’t rush; let the tension build!',
+    'Steal a kiss whenever you feel like it!',
   ],
 
-  // Wheel content -- placeholder lengths matched to final version.
-  // PoC ships with 2 options on W1 and W2; final adds more.
+  // Pre-spin display on the 3 wheels:
+  //   above:  | The | endless | caress      |
+  //   center: | The | Touch   | Marathon    |
+  //   below:  | This | is a   | demo version |
+  // Each wheel's initialDisplay is [above, center, below] -- 3 items, currentIdx=1.
   wheels: {
-    w1: ['eo AMFQ tZTCOj', 'phn AMFQ tZTCOj'],
-    w2: ['csl', 'kfn'],
+    initialDisplay: {
+      w1: ['The', 'The', 'This'],
+      w2: ['endless', 'Touch', 'is a'],
+      w3: ['caress', 'Marathon', 'demo version'],
+    },
+    w1: ['He will caress', 'She will caress'],
+    w2: ['his', 'her'],
     w3: {
-      // Each group is a queue. Group 1 seeds the wheel; Groups 2 and 3 feed
-      // in via peel-off as letters are consumed.
-      group1: [
-        'aaaaaaaaaaaaa',
-        'bbbbbbbbbbbbb',
-        'ccccccccccccc',
-        'ddddddddddddd',
-        'eeeeeeeeeeeee',
-        'fffffffffffff',
-      ],
+      group1: ['Scalp/Hair', 'Face', 'Palms/Wrists', 'Forearms', 'Feet/Ankles', 'Neck'],
       group2: [
-        'gggggggggggg',
-        'hhhhhhhhhhhh',
-        'iiiiiiiiiiii',
-        'jjjjjjjjjjjj',
-        'kkkkkkkkkkkk',
-        'llllllllllll',
-        'mmmmmmmmmmmm',
-        'nnnnnnnnnnnn',
+        'Mouth', 'Shoulders/Arms', 'Upper Back', 'Calves/Knees',
+        'Lower Back', 'Outer Thighs', 'Abdomen', 'Hips',
       ],
       group3: ['Inner Thighs'],
     },
   },
 
-  final: {
-    heading: 'Thank you',
+  // Semi-Final: shown when "Inner Thighs" surfaces. Email capture lives here.
+  semiFinal: {
+    heading: 'The Touch Marathon is just beginning.',
     body: [
-      'Vzqrezyr ppr dzyvngv zg qxsh zg lwaaxlsf kshxdmzkzf vhe kshf.',
-      'Slszvur zg vhe rwvf dbeivf.',
+      'You were among the first to explore the mechanics.',
+      'Join us as an official Beta tester.',
+      'Get a Free Access Code for the Premium version at launch.',
+      'Zero spam, just pure adrenaline.',
     ],
     cta: {
-      label: 'Be the first to know when Marathon launches.',
+      label: '',
       placeholder: 'your@email.com',
+      consent: 'I’m okay with being notified for the Beta launch.',
       button: 'Notify Me',
-      success: "You’re on the list.",
       error: 'Please enter a valid email.',
+      consentError: 'Please confirm consent to be notified.',
     },
+    teaser: 'The K. S., The I. R. and T.T.T. soon',
+  },
+
+  // Final: shown after the user submits on Semi-Final.
+  final: {
+    heading: 'Welcome to the inner circle.',
+    body: [
+      'This PoC was just the prelude. In the Beta and Premium versions, we’re raising the stakes with synchronized interactions and total control over the escalation.',
+      'We’ll be in touch when the heat rises.',
+    ],
   },
 
   rotate: {
     heading: 'Rotate your device',
-    body: 'Marathon is designed for landscape.',
+    body: 'Touch Marathon is designed for landscape.',
   },
 };
