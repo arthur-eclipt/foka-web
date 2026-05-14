@@ -587,12 +587,12 @@
     stack.appendChild(top);
     centerEl.appendChild(stack);
 
-    void stack.offsetHeight; // reflow
-
     if (state.audio) state.audio.peel();
+    // CSS @keyframes animation kicks in when .peeling is added; no rAF
+    // dance required (transitions are flaky for freshly-added elements).
     stack.classList.add('peeling');
 
-    await sleep(1850);
+    await sleep(2050);
   }
 
   // ------------------------------------------------------------------
