@@ -446,15 +446,25 @@ input {
 
 /* peel-off animation: a card flips down from the top, revealing what's
    beneath. The center wheel-item becomes a stack of two layers. */
+/* Sticker peel adapted from reactbits.dev/animations/sticker-peel.
+   Three stacked layers:
+     1. .peel-bottom -- the new zone (always under everything)
+     2. .peel-main   -- the old zone label; clip-path's top edge animates
+        downward, progressively peeling the sticker away
+     3. .peel-flap   -- a mirrored "back of sticker" that follows the peel
+        line, sliding down with the fold so it looks like the lifted
+        portion is folded over the still-stuck portion
+   No 3D transforms; the illusion is pure 2D clip + mirror. */
+
 .peel-stack {
   position: absolute;
   inset: 0;
-  perspective: 460px;
-  perspective-origin: 30% top;
 }
-.peel-layer {
+
+.peel-bottom {
   position: absolute;
   inset: 0;
+  z-index: 1;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -463,86 +473,116 @@ input {
   font-weight: 500;
   color: var(--ink);
   letter-spacing: 0.02em;
-  backface-visibility: hidden;
 }
-.peel-layer.bottom {
-  z-index: 1;
-  opacity: 0.85;
-}
-.peel-layer.top {
+
+.peel-main {
+  position: absolute;
+  inset: 0;
   z-index: 2;
-  /* Anchor at bottom-left so the sticker hinges from that corner; the
-     top-right corner is the one that lifts. */
-  transform-origin: 0% 100%;
+  box-sizing: border-box;
   background: linear-gradient(135deg,
     rgba(72, 22, 32, 1) 0%,
-    rgba(48, 14, 22, 0.99) 45%,
+    rgba(48, 14, 22, 0.99) 55%,
     rgba(28, 8, 12, 0.98) 100%);
+  border: 1px solid rgba(201, 162, 83, 0.42);
   border-radius: 3px;
-  box-shadow:
-    inset 0 1px 0 rgba(201, 162, 83, 0.22),
-    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
-    0 0 0 1px rgba(201, 162, 83, 0.22),
-    0 1px 0 rgba(0, 0, 0, 0.35);
+  /* Initial clip: full coverage (top edge at 0%, bottom edge below). */
+  clip-path: polygon(
+    -5px 0%,
+    calc(100% + 5px) 0%,
+    calc(100% + 5px) calc(100% + 5px),
+    -5px calc(100% + 5px)
+  );
+  filter: drop-shadow(0 2px 5px rgba(0, 0, 0, 0.45));
+}
+.peel-main-inner {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--serif);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--ink);
+  letter-spacing: 0.02em;
 }
 
-/* Sticker peel: the sticker hinges from the bottom-left corner; the
-   opposite (top-right) corner lifts up off the surface and curls
-   backward. Axis rotate3d(1, 4, 0, ...) is mostly vertical with a slight
-   diagonal so a wide-and-short slot gets a clear corner peel rather than
-   a flat blind-flap. Shadow grows + offsets to sell the lift. */
-@keyframes sticker-peel {
+.peel-flap {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  left: 0;
+  top: calc(-100% - 5px);
+  z-index: 3;
+  box-sizing: border-box;
+  transform: scaleY(-1);
+  background:
+    linear-gradient(180deg,
+      rgba(36, 12, 18, 0.96) 0%,
+      rgba(24, 8, 12, 0.94) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.012) 0 6px,
+      rgba(0, 0, 0, 0.04) 6px 12px);
+  background-blend-mode: overlay;
+  border: 1px solid rgba(201, 162, 83, 0.22);
+  border-radius: 3px;
+  /* Initial clip: invisible -- degenerate polygon at the top edge. */
+  clip-path: polygon(
+    -5px -5px,
+    calc(100% + 5px) -5px,
+    calc(100% + 5px) -5px,
+    -5px -5px
+  );
+  filter: drop-shadow(0 -3px 6px rgba(0, 0, 0, 0.45));
+}
+
+@keyframes peel-main-fold {
   0% {
-    transform: rotate3d(1, 4, 0, 0deg);
-    opacity: 1;
-    box-shadow:
-      inset 0 1px 0 rgba(201, 162, 83, 0.22),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
-      0 0 0 1px rgba(201, 162, 83, 0.22),
-      0 1px 0 rgba(0, 0, 0, 0.35);
-  }
-  18% {
-    transform: rotate3d(1, 4, 0, 22deg);
-    opacity: 1;
-    box-shadow:
-      inset 0 1px 0 rgba(201, 162, 83, 0.3),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.35),
-      0 0 0 1px rgba(201, 162, 83, 0.38),
-      6px 6px 12px rgba(0, 0, 0, 0.55);
-  }
-  50% {
-    transform: rotate3d(1, 4, 0, 78deg);
-    opacity: 0.85;
-    box-shadow:
-      inset 0 1px 0 rgba(201, 162, 83, 0.4),
-      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
-      0 0 0 1px rgba(201, 162, 83, 0.5),
-      14px 14px 22px rgba(0, 0, 0, 0.7);
-  }
-  82% {
-    transform: rotate3d(1, 4, 0, 140deg);
-    opacity: 0.32;
-    box-shadow:
-      0 0 0 1px rgba(201, 162, 83, 0.4),
-      18px 16px 26px rgba(0, 0, 0, 0.55);
+    clip-path: polygon(
+      -5px 0%,
+      calc(100% + 5px) 0%,
+      calc(100% + 5px) calc(100% + 5px),
+      -5px calc(100% + 5px)
+    );
   }
   100% {
-    transform: rotate3d(1, 4, 0, 172deg);
-    opacity: 0;
-    box-shadow: 22px 18px 32px rgba(0, 0, 0, 0.2);
+    clip-path: polygon(
+      -5px 100%,
+      calc(100% + 5px) 100%,
+      calc(100% + 5px) calc(100% + 5px),
+      -5px calc(100% + 5px)
+    );
   }
 }
-@keyframes peel-bottom-fade-in {
-  0%   { opacity: 0.7; }
-  55%  { opacity: 0.92; }
-  100% { opacity: 1; }
+
+@keyframes peel-flap-fold {
+  0% {
+    top: calc(-100% - 5px);
+    clip-path: polygon(
+      -5px -5px,
+      calc(100% + 5px) -5px,
+      calc(100% + 5px) -5px,
+      -5px -5px
+    );
+  }
+  100% {
+    top: calc(100% - 1px);
+    clip-path: polygon(
+      -5px -5px,
+      calc(100% + 5px) -5px,
+      calc(100% + 5px) 100%,
+      -5px 100%
+    );
+  }
 }
 
-.peel-stack.peeling .peel-layer.top {
-  animation: sticker-peel 2.0s cubic-bezier(0.45, 0.05, 0.55, 1) forwards;
+.peel-stack.peeling .peel-main {
+  animation: peel-main-fold 2.0s cubic-bezier(0.5, 0.05, 0.5, 1) forwards;
 }
-.peel-stack.peeling .peel-layer.bottom {
-  animation: peel-bottom-fade-in 2.0s ease-out forwards;
+.peel-stack.peeling .peel-flap {
+  animation: peel-flap-fold 2.0s cubic-bezier(0.5, 0.05, 0.5, 1) forwards;
 }
 
 .marathon-footer {

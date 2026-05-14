@@ -575,21 +575,30 @@
     const stack = document.createElement('div');
     stack.className = 'peel-stack';
 
+    // Bottom: the new zone, sits underneath the peeling layers.
     const bottom = document.createElement('div');
-    bottom.className = 'peel-layer bottom';
+    bottom.className = 'peel-bottom';
     bottom.textContent = newText;
 
-    const top = document.createElement('div');
-    top.className = 'peel-layer top';
-    top.textContent = oldText;
+    // Main: the old zone sticker, clip-path peels its top edge downward.
+    const main = document.createElement('div');
+    main.className = 'peel-main';
+    const mainInner = document.createElement('div');
+    mainInner.className = 'peel-main-inner';
+    mainInner.textContent = oldText;
+    main.appendChild(mainInner);
+
+    // Flap: mirrored "back" of the sticker -- text-less colored panel that
+    // follows the peel line and looks like the lifted portion folded over.
+    const flap = document.createElement('div');
+    flap.className = 'peel-flap';
 
     stack.appendChild(bottom);
-    stack.appendChild(top);
+    stack.appendChild(main);
+    stack.appendChild(flap);
     centerEl.appendChild(stack);
 
     if (state.audio) state.audio.peel();
-    // CSS @keyframes animation kicks in when .peeling is added; no rAF
-    // dance required (transitions are flaky for freshly-added elements).
     stack.classList.add('peeling');
 
     await sleep(2050);
