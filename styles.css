@@ -449,8 +449,8 @@ input {
 .peel-stack {
   position: absolute;
   inset: 0;
-  perspective: 380px;
-  perspective-origin: center top;
+  perspective: 460px;
+  perspective-origin: 30% top;
 }
 .peel-layer {
   position: absolute;
@@ -471,62 +471,75 @@ input {
 }
 .peel-layer.top {
   z-index: 2;
-  transform-origin: top center;
-  background: linear-gradient(180deg,
-    rgba(58, 16, 24, 0.98) 0%,
-    rgba(32, 9, 14, 0.96) 100%);
-  border-radius: 2px;
+  /* Anchor at bottom-left so the sticker hinges from that corner; the
+     top-right corner is the one that lifts. */
+  transform-origin: 0% 100%;
+  background: linear-gradient(135deg,
+    rgba(72, 22, 32, 1) 0%,
+    rgba(48, 14, 22, 0.99) 45%,
+    rgba(28, 8, 12, 0.98) 100%);
+  border-radius: 3px;
   box-shadow:
-    inset 0 1px 0 rgba(201, 162, 83, 0.18),
-    0 0 0 1px rgba(201, 162, 83, 0.2),
+    inset 0 1px 0 rgba(201, 162, 83, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+    0 0 0 1px rgba(201, 162, 83, 0.22),
     0 1px 0 rgba(0, 0, 0, 0.35);
 }
 
-/* Keyframe animations are more reliable than transitions for elements that
-   are dynamically added to the DOM (transitions need the initial style to
-   be committed in a previous paint, which is flaky with rAF). */
-@keyframes peel-card-away {
+/* Sticker peel: the sticker hinges from the bottom-left corner; the
+   opposite (top-right) corner lifts up off the surface and curls
+   backward. Axis rotate3d(1, 4, 0, ...) is mostly vertical with a slight
+   diagonal so a wide-and-short slot gets a clear corner peel rather than
+   a flat blind-flap. Shadow grows + offsets to sell the lift. */
+@keyframes sticker-peel {
   0% {
-    transform: rotateX(0) translateY(0);
+    transform: rotate3d(1, 4, 0, 0deg);
     opacity: 1;
     box-shadow:
-      inset 0 1px 0 rgba(201, 162, 83, 0.18),
-      0 0 0 1px rgba(201, 162, 83, 0.2),
+      inset 0 1px 0 rgba(201, 162, 83, 0.22),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.3),
+      0 0 0 1px rgba(201, 162, 83, 0.22),
       0 1px 0 rgba(0, 0, 0, 0.35);
   }
   18% {
-    transform: rotateX(-22deg) translateY(-2px);
+    transform: rotate3d(1, 4, 0, 22deg);
     opacity: 1;
     box-shadow:
-      inset 0 1px 0 rgba(201, 162, 83, 0.28),
-      0 0 0 1px rgba(201, 162, 83, 0.4),
-      0 6px 14px rgba(0, 0, 0, 0.5);
+      inset 0 1px 0 rgba(201, 162, 83, 0.3),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(201, 162, 83, 0.38),
+      6px 6px 12px rgba(0, 0, 0, 0.55);
   }
-  55% {
-    transform: rotateX(-92deg) translateY(-4px);
-    opacity: 0.55;
+  50% {
+    transform: rotate3d(1, 4, 0, 78deg);
+    opacity: 0.85;
     box-shadow:
-      inset 0 1px 0 rgba(201, 162, 83, 0.32),
-      0 0 0 1px rgba(201, 162, 83, 0.45),
-      0 14px 26px rgba(0, 0, 0, 0.65);
+      inset 0 1px 0 rgba(201, 162, 83, 0.4),
+      inset 0 -1px 0 rgba(0, 0, 0, 0.4),
+      0 0 0 1px rgba(201, 162, 83, 0.5),
+      14px 14px 22px rgba(0, 0, 0, 0.7);
+  }
+  82% {
+    transform: rotate3d(1, 4, 0, 140deg);
+    opacity: 0.32;
+    box-shadow:
+      0 0 0 1px rgba(201, 162, 83, 0.4),
+      18px 16px 26px rgba(0, 0, 0, 0.55);
   }
   100% {
-    transform: rotateX(-150deg) translateY(-6px);
+    transform: rotate3d(1, 4, 0, 172deg);
     opacity: 0;
-    box-shadow:
-      inset 0 1px 0 rgba(201, 162, 83, 0.32),
-      0 0 0 1px rgba(201, 162, 83, 0.45),
-      0 18px 32px rgba(0, 0, 0, 0.5);
+    box-shadow: 22px 18px 32px rgba(0, 0, 0, 0.2);
   }
 }
 @keyframes peel-bottom-fade-in {
-  0%   { opacity: 0.65; }
-  60%  { opacity: 0.9; }
+  0%   { opacity: 0.7; }
+  55%  { opacity: 0.92; }
   100% { opacity: 1; }
 }
 
 .peel-stack.peeling .peel-layer.top {
-  animation: peel-card-away 2.0s cubic-bezier(0.55, 0.06, 0.42, 1) forwards;
+  animation: sticker-peel 2.0s cubic-bezier(0.45, 0.05, 0.55, 1) forwards;
 }
 .peel-stack.peeling .peel-layer.bottom {
   animation: peel-bottom-fade-in 2.0s ease-out forwards;
