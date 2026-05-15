@@ -204,13 +204,18 @@
                     opacity 0.3s ease;
       }
       .peel-btn.peel-a .front {
-        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
+        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease;
       }
       .peel-btn.peel-a:hover .front,
       .peel-btn.peel-a.peeling .front {
-        /* Degenerate polygon — diagonal cut reaches both opposite
-           corners, so the sticker face vanishes after a clean peel. */
+        /* Diagonal cut reaches the opposite corners (visually drives
+           the peel) — then opacity fade kills the residual triangle
+           so the sticker is fully gone at the end. */
         clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%);
+        opacity: 0;
+        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease 0.5s;
       }
       .peel-btn.peel-a:hover .back,
       .peel-btn.peel-a.peeling .back {
@@ -241,11 +246,15 @@
                     opacity 0.3s ease;
       }
       .peel-btn.peel-b .front {
-        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
+        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease;
       }
       .peel-btn.peel-b:hover .front,
       .peel-btn.peel-b.peeling .front {
         clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%);
+        opacity: 0;
+        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease 0.5s;
       }
       .peel-btn.peel-b:hover .back,
       .peel-btn.peel-b.peeling .back {
