@@ -204,24 +204,22 @@
                     opacity 0.3s ease;
       }
       .peel-btn.peel-a .front {
-        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease;
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
       }
       .peel-btn.peel-a:hover .front,
       .peel-btn.peel-a.peeling .front {
-        /* Diagonal cut reaches the opposite corners (visually drives
-           the peel) — then opacity fade kills the residual triangle
-           so the sticker is fully gone at the end. */
-        clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%);
-        opacity: 0;
-        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease 0.5s;
+        /* Diagonal cut overshoots to (200%, 0%)→(0%, 200%) — the cut
+           line x+y=200% only touches the rect at the BR corner, so
+           the visible area shrinks continuously to zero. No residual,
+           no opacity hack, peel is gentle all the way through. */
+        clip-path: polygon(200% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 200%);
       }
       .peel-btn.peel-a:hover .back,
       .peel-btn.peel-a.peeling .back {
-        /* Underside grows to the full TL triangle, then fades out at
-           the end so the PEELED text reads cleanly. */
-        clip-path: polygon(0% 0%, 100% 0%, 0% 100%, 0% 0%, 0% 0%);
+        /* Back's outer edge tracks the front's so they meet at the
+           fold line throughout the animation. Opacity fades at the
+           tail so the PEELED text reads cleanly once the peel ends. */
+        clip-path: polygon(0% 0%, 200% 0%, 0% 200%, 0% 0%, 0% 0%);
         opacity: 0;
         transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
                     opacity 0.3s ease 0.5s;
