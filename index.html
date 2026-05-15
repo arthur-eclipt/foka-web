@@ -14,7 +14,6 @@
         --gold-deep:      #8e6a26;
         --burgundy:       #4a0d18;
         --burgundy-back:  #2c0810;
-        --burgundy-deep:  #1a040a;
         --bg:             #0a0306;
         --ink:            #f4e4c1;
       }
@@ -26,18 +25,21 @@
         background: radial-gradient(ellipse at center, #220a10 0%, var(--bg) 70%);
         font-family: 'Inter', system-ui, sans-serif;
         color: var(--ink);
-        display: grid;
-        place-items: center;
         touch-action: manipulation;
       }
-      body { padding: 40px 16px; }
+      body {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px 20px;
+      }
 
       .lab {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 36px;
-        max-width: 900px;
+        gap: 32px;
       }
       .lab h1 {
         font-family: 'Cormorant Garamond', serif;
@@ -45,21 +47,23 @@
         font-size: 22px;
         letter-spacing: 0.18em;
         color: rgba(244, 228, 193, 0.55);
-        margin: 0;
+        margin: 0 0 4px;
         text-transform: uppercase;
       }
       .hint {
         font-size: 11px;
         letter-spacing: 0.18em;
         color: rgba(244, 228, 193, 0.4);
-        margin: 0;
+        margin: 4px 0 0;
         text-transform: uppercase;
+        text-align: center;
       }
       .credit {
         font-size: 11px;
         letter-spacing: 0.14em;
         color: rgba(244, 228, 193, 0.32);
         margin: 0;
+        text-align: center;
       }
       .credit a {
         color: rgba(244, 228, 193, 0.5);
@@ -81,69 +85,76 @@
       }
       .reset:hover { color: var(--gold); border-color: rgba(201, 162, 83, 0.4); }
 
-      .variants {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 40px 56px;
-        justify-content: center;
-        align-items: flex-start;
-      }
       .variant {
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 16px;
+        gap: 12px;
       }
-      .variant-tag {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 13px;
-        letter-spacing: 0.24em;
-        color: rgba(244, 228, 193, 0.5);
+      .variant-label {
+        font-size: 10px;
+        letter-spacing: 0.28em;
+        color: rgba(244, 228, 193, 0.4);
         text-transform: uppercase;
       }
 
-      /* =====================================================
-         Shared peel button shell
-         ===================================================== */
+      /* ========================================================== */
+      /* Shared peel-btn base                                          */
+      /*                                                              */
+      /*   layer 1 .reveal  PEELED text — sits underneath              */
+      /*   layer 2 .front   gold sticker face (label rides inside)    */
+      /*   layer 3 .back    underside of sticker, variant-specific    */
+      /*                                                              */
+      /* Each variant defines its own peeled-state clip-paths and    */
+      /* underside gradient. All variants start with full rectangle  */
+      /* minus a tiny TL corner as a visual "peelable" cue.          */
+      /* ========================================================== */
+
       .peel-btn {
         position: relative;
-        width: 240px;
-        height: 76px;
+        width: 260px;
+        height: 80px;
         border: none;
         background: none;
         padding: 0;
         cursor: pointer;
         font-family: inherit;
-        overflow: visible;
       }
 
-      /* Layer 1 — burgundy card with inner shadow, holds PEELED text. */
       .peel-btn .reveal {
         position: absolute;
         inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        background:
-          radial-gradient(ellipse at 30% 30%, rgba(74, 13, 24, 0.55) 0%, transparent 60%),
-          linear-gradient(180deg, var(--burgundy-back) 0%, var(--burgundy-deep) 100%);
+        background: var(--burgundy-back);
         border-radius: 14px;
         box-shadow:
-          inset 0 2px 6px rgba(0, 0, 0, 0.7),
-          inset 0 0 0 1px rgba(74, 13, 24, 0.55),
-          inset 0 -1px 0 rgba(255, 230, 200, 0.04);
+          inset 0 1px 0 rgba(0, 0, 0, 0.5),
+          inset 0 0 28px rgba(0, 0, 0, 0.55);
         font-family: 'Cormorant Garamond', serif;
         font-weight: 500;
-        font-size: 16px;
+        font-size: 15px;
         letter-spacing: 0.32em;
         color: var(--gold-bright);
-        text-shadow: 0 0 14px rgba(201, 162, 83, 0.5);
+        text-shadow: 0 0 16px rgba(201, 162, 83, 0.6);
         text-transform: uppercase;
-        z-index: 0;
+        z-index: 1;
       }
 
-      /* Shared label style inside the gold sticker. */
-      .peel-btn .label {
+      .peel-btn .front {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
+        border-radius: 14px;
+        box-shadow:
+          0 0 0 1px rgba(201, 162, 83, 0.65),
+          0 10px 22px rgba(201, 162, 83, 0.18),
+          inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        clip-path: polygon(8% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 8%);
+        z-index: 2;
+      }
+      .peel-btn .front .label {
         position: absolute;
         inset: 0;
         display: flex;
@@ -156,157 +167,126 @@
         color: #1a0508;
         text-transform: uppercase;
         pointer-events: none;
+        transition: opacity 0.08s linear 0.45s;
       }
 
-      /* =====================================================
-         Variant A — Slide-off
-         The sticker translates diagonally off the card with a
-         slight rotation, fading near the end. No fold visible;
-         it just lifts and flies away.
-         ===================================================== */
-      .peel-a .front-a {
+      .peel-btn .back {
         position: absolute;
         inset: 0;
-        background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
-        border-radius: 14px;
-        box-shadow:
-          0 0 0 1px rgba(201, 162, 83, 0.65),
-          0 10px 22px rgba(201, 162, 83, 0.18),
-          inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        z-index: 2;
-        transition:
-          transform 0.75s cubic-bezier(0.5, 0.0, 0.3, 1),
-          opacity   0.5s ease 0.2s,
-          box-shadow 0.75s ease;
-        transform-origin: 100% 100%;
-      }
-      .peel-a:hover .front-a,
-      .peel-a.peeling .front-a {
-        transform: translate(120%, 70%) rotate(12deg);
-        opacity: 0;
-        box-shadow:
-          0 0 0 1px rgba(201, 162, 83, 0.4),
-          0 20px 40px rgba(0, 0, 0, 0.5),
-          inset 0 1px 0 rgba(255, 255, 255, 0.3);
-      }
-
-      /* =====================================================
-         Variant B — Corner curl (3D fold from TL)
-         A 3D rotation around the anti-diagonal axis pinned at
-         BR corner. The sticker flips backward, briefly shows
-         its underside, then continues off-screen.
-         ===================================================== */
-      .peel-b {
-        perspective: 1100px;
-      }
-      .peel-b .card-3d {
-        position: absolute;
-        inset: 0;
-        transform-style: preserve-3d;
-        transform-origin: 100% 100%;
-        transition: transform 0.95s cubic-bezier(0.5, 0.0, 0.3, 1);
-        z-index: 2;
-      }
-      .peel-b .front-b,
-      .peel-b .back-b {
-        position: absolute;
-        inset: 0;
-        border-radius: 14px;
-        backface-visibility: hidden;
-        -webkit-backface-visibility: hidden;
-      }
-      .peel-b .front-b {
-        background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
-        box-shadow:
-          0 0 0 1px rgba(201, 162, 83, 0.65),
-          0 10px 22px rgba(201, 162, 83, 0.18),
-          inset 0 1px 0 rgba(255, 255, 255, 0.3);
-      }
-      .peel-b .back-b {
-        background:
-          linear-gradient(135deg,
-            rgba(120, 60, 80, 0.95) 0%,
-            rgba(74, 26, 38, 0.95) 50%,
-            rgba(50, 16, 26, 0.95) 100%);
-        transform: rotateY(180deg);
-        box-shadow:
-          0 0 0 1px rgba(0, 0, 0, 0.35),
-          inset 0 1px 0 rgba(255, 200, 180, 0.06);
-      }
-      .peel-b:hover .card-3d,
-      .peel-b.peeling .card-3d {
-        transform: rotate3d(-1, 1, 0, 178deg) translate3d(40%, -25%, 60px);
-      }
-      .peel-b:hover .label,
-      .peel-b.peeling .label {
-        opacity: 0;
-        transition: opacity 0.2s ease 0.15s;
-      }
-      .peel-b .label {
-        transition: opacity 0.25s ease 0.4s;
-      }
-
-      /* =====================================================
-         Variant C — Diagonal fold-and-fall
-         Phase 1: Patrick Kunka–style fold grows across the
-         sticker (TL → BR), exposing the burgundy underside.
-         Phase 2: The whole assembly translates off the card.
-         ===================================================== */
-      .peel-c .stage-c {
-        position: absolute;
-        inset: 0;
-        z-index: 2;
-        transition: transform 0.5s cubic-bezier(0.5, 0.0, 0.3, 1) 0.35s,
-                    opacity   0.4s ease 0.4s;
-      }
-      .peel-c .front-c {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
-        border-radius: 14px;
-        box-shadow:
-          0 0 0 1px rgba(201, 162, 83, 0.65),
-          0 10px 22px rgba(201, 162, 83, 0.18),
-          inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        clip-path: polygon(8% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 8%);
-        transition: clip-path 0.5s cubic-bezier(0.55, 0.05, 0.4, 1);
-      }
-      .peel-c .back-c {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(
-          165deg,
-          rgba(40, 14, 22, 0.0)  0%,
-          rgba(40, 14, 22, 0.0)  10%,
-          rgba(58, 20, 30, 0.55) 30%,
-          rgba(86, 32, 48, 0.95) 55%,
-          rgba(120, 56, 76, 0.95) 80%,
-          rgba(160, 90, 110, 0.0) 100%
-        );
         border-radius: 14px;
         clip-path: polygon(0% 0%, 8% 0%, 0% 8%, 0% 0%, 0% 0%);
-        filter: drop-shadow(2px 3px 6px rgba(0, 0, 0, 0.5));
-        transition: clip-path 0.5s cubic-bezier(0.55, 0.05, 0.4, 1);
+        filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.5));
+        z-index: 3;
       }
-      .peel-c .label {
-        transition: opacity 0.05s linear 0.35s;
-      }
-      .peel-c:hover .front-c,
-      .peel-c.peeling .front-c {
-        clip-path: polygon(98% 0%, 100% 0%, 100% 2%, 100% 100%, 0% 100%);
-      }
-      .peel-c:hover .back-c,
-      .peel-c.peeling .back-c {
-        clip-path: polygon(0% 0%, 100% 0%, 0% 100%, 0% 0%);
-      }
-      .peel-c:hover .label,
-      .peel-c.peeling .label {
+
+      .peel-btn:hover .label,
+      .peel-btn.peeling .label {
         opacity: 0;
-        transition: opacity 0.05s linear 0.2s;
+        transition: opacity 0.08s linear 0.25s;
       }
-      .peel-c:hover .stage-c,
-      .peel-c.peeling .stage-c {
-        transform: translate(95%, 95%) rotate(18deg);
+
+      /* ========================================================== */
+      /* Variant A — Paper backing                                   */
+      /* Sticker peels diagonally and lifts away. Underside reads as */
+      /* warm cream paper (like a sticker's release liner).          */
+      /* ========================================================== */
+      .peel-btn.peel-a .back {
+        background: linear-gradient(
+          155deg,
+          rgba(232, 216, 184, 0)    0%,
+          rgba(232, 216, 184, 0)    18%,
+          rgba(232, 216, 184, 0.78) 36%,
+          rgba(214, 194, 154, 0.92) 55%,
+          rgba(180, 154, 104, 0.82) 76%,
+          rgba(140, 110, 66, 0)     100%
+        );
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease;
+      }
+      .peel-btn.peel-a .front {
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
+      }
+      .peel-btn.peel-a:hover .front,
+      .peel-btn.peel-a.peeling .front {
+        /* Degenerate polygon — diagonal cut reaches both opposite
+           corners, so the sticker face vanishes after a clean peel. */
+        clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%);
+      }
+      .peel-btn.peel-a:hover .back,
+      .peel-btn.peel-a.peeling .back {
+        /* Underside grows to the full TL triangle, then fades out at
+           the end so the PEELED text reads cleanly. */
+        clip-path: polygon(0% 0%, 100% 0%, 0% 100%, 0% 0%, 0% 0%);
+        opacity: 0;
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease 0.5s;
+      }
+
+      /* ========================================================== */
+      /* Variant B — Burgundy underside                              */
+      /* Same peel motion as A but underside is deep burgundy, so   */
+      /* the sticker appears to peel into the page itself.           */
+      /* ========================================================== */
+      .peel-btn.peel-b .back {
+        background: linear-gradient(
+          165deg,
+          rgba(40, 14, 22, 0)    0%,
+          rgba(40, 14, 22, 0)    18%,
+          rgba(58, 20, 30, 0.55) 36%,
+          rgba(82, 30, 44, 0.9)  55%,
+          rgba(110, 48, 68, 0.85) 75%,
+          rgba(150, 80, 100, 0)  100%
+        );
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease;
+      }
+      .peel-btn.peel-b .front {
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
+      }
+      .peel-btn.peel-b:hover .front,
+      .peel-btn.peel-b.peeling .front {
+        clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%);
+      }
+      .peel-btn.peel-b:hover .back,
+      .peel-btn.peel-b.peeling .back {
+        clip-path: polygon(0% 0%, 100% 0%, 0% 100%, 0% 0%, 0% 0%);
+        opacity: 0;
+        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
+                    opacity 0.3s ease 0.5s;
+      }
+
+      /* ========================================================== */
+      /* Variant C — Lift & rotate off                               */
+      /* Sticker peels lightly, then the whole thing translates +   */
+      /* rotates + fades away — like being picked off with tweezers.*/
+      /* ========================================================== */
+      .peel-btn.peel-c .back {
+        background: linear-gradient(
+          155deg,
+          rgba(232, 216, 184, 0)    0%,
+          rgba(232, 216, 184, 0)    22%,
+          rgba(218, 200, 162, 0.88) 48%,
+          rgba(186, 158, 108, 0.55) 85%,
+          rgba(140, 110, 66, 0)     100%
+        );
+      }
+      .peel-btn.peel-c .front,
+      .peel-btn.peel-c .back {
+        transform-origin: 100% 100%;
+        transition: transform 0.85s cubic-bezier(0.5, 0.05, 0.3, 1),
+                    clip-path 0.6s cubic-bezier(0.5, 0.05, 0.3, 1),
+                    opacity 0.45s ease 0.4s;
+      }
+      .peel-btn.peel-c:hover .front,
+      .peel-btn.peel-c.peeling .front {
+        clip-path: polygon(55% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 55%);
+        transform: translate(48%, 75%) rotate(-20deg);
+        opacity: 0;
+      }
+      .peel-btn.peel-c:hover .back,
+      .peel-btn.peel-c.peeling .back {
+        clip-path: polygon(0% 0%, 55% 0%, 0% 55%, 0% 0%, 0% 0%);
+        transform: translate(48%, 75%) rotate(-20deg);
         opacity: 0;
       }
     </style>
@@ -315,45 +295,40 @@
     <main class="lab">
       <h1>Peel Lab</h1>
 
-      <div class="variants">
-        <div class="variant">
-          <span class="variant-tag">A · Slide off</span>
-          <button class="peel-btn peel-a" type="button">
-            <span class="reveal">PEELED</span>
-            <span class="front-a">
-              <span class="label">CLICK ME</span>
-            </span>
-          </button>
-        </div>
-
-        <div class="variant">
-          <span class="variant-tag">B · Corner curl</span>
-          <button class="peel-btn peel-b" type="button">
-            <span class="reveal">PEELED</span>
-            <span class="card-3d">
-              <span class="front-b">
-                <span class="label">CLICK ME</span>
-              </span>
-              <span class="back-b" aria-hidden="true"></span>
-            </span>
-          </button>
-        </div>
-
-        <div class="variant">
-          <span class="variant-tag">C · Fold &amp; fall</span>
-          <button class="peel-btn peel-c" type="button">
-            <span class="reveal">PEELED</span>
-            <span class="stage-c">
-              <span class="back-c" aria-hidden="true"></span>
-              <span class="front-c">
-                <span class="label">CLICK ME</span>
-              </span>
-            </span>
-          </button>
-        </div>
+      <div class="variant">
+        <span class="variant-label">A &middot; Paper backing</span>
+        <button class="peel-btn peel-a" type="button">
+          <span class="reveal">PEELED</span>
+          <span class="front">
+            <span class="label">CLICK ME</span>
+          </span>
+          <span class="back" aria-hidden="true"></span>
+        </button>
       </div>
 
-      <p class="hint">Hover to preview · Click to lock peeled</p>
+      <div class="variant">
+        <span class="variant-label">B &middot; Burgundy underside</span>
+        <button class="peel-btn peel-b" type="button">
+          <span class="reveal">PEELED</span>
+          <span class="front">
+            <span class="label">CLICK ME</span>
+          </span>
+          <span class="back" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <div class="variant">
+        <span class="variant-label">C &middot; Lift &amp; rotate off</span>
+        <button class="peel-btn peel-c" type="button">
+          <span class="reveal">PEELED</span>
+          <span class="front">
+            <span class="label">CLICK ME</span>
+          </span>
+          <span class="back" aria-hidden="true"></span>
+        </button>
+      </div>
+
+      <p class="hint">Hover to preview &middot; Click to lock peeled</p>
 
       <button class="reset" type="button">Reset all</button>
 
@@ -366,12 +341,11 @@
     </main>
 
     <script>
-      const buttons = document.querySelectorAll('.peel-btn');
-      buttons.forEach(btn => {
+      document.querySelectorAll('.peel-btn').forEach(btn => {
         btn.addEventListener('click', () => btn.classList.toggle('peeling'));
       });
       document.querySelector('.reset').addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('peeling'));
+        document.querySelectorAll('.peel-btn').forEach(btn => btn.classList.remove('peeling'));
       });
     </script>
   </body>
