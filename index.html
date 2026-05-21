@@ -2,360 +2,159 @@
 <html lang="en">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-    <title>Foka</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+    <meta name="theme-color" content="#0a0306" />
+    <title>FOKA · Touch Marathon</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" />
-    <style>
-      :root {
-        --gold:           #c9a253;
-        --gold-bright:    #e6c177;
-        --gold-deep:      #8e6a26;
-        --burgundy:       #4a0d18;
-        --burgundy-back:  #2c0810;
-        --bg:             #0a0306;
-        --ink:            #f4e4c1;
-      }
-
-      * { box-sizing: border-box; }
-      html, body {
-        margin: 0;
-        min-height: 100%;
-        background: radial-gradient(ellipse at center, #220a10 0%, var(--bg) 70%);
-        font-family: 'Inter', system-ui, sans-serif;
-        color: var(--ink);
-        touch-action: manipulation;
-      }
-      body {
-        min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 20px;
-      }
-
-      .lab {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 32px;
-      }
-      .lab h1 {
-        font-family: 'Cormorant Garamond', serif;
-        font-weight: 500;
-        font-size: 22px;
-        letter-spacing: 0.18em;
-        color: rgba(244, 228, 193, 0.55);
-        margin: 0 0 4px;
-        text-transform: uppercase;
-      }
-      .hint {
-        font-size: 11px;
-        letter-spacing: 0.18em;
-        color: rgba(244, 228, 193, 0.4);
-        margin: 4px 0 0;
-        text-transform: uppercase;
-        text-align: center;
-      }
-      .credit {
-        font-size: 11px;
-        letter-spacing: 0.14em;
-        color: rgba(244, 228, 193, 0.32);
-        margin: 0;
-        text-align: center;
-      }
-      .credit a {
-        color: rgba(244, 228, 193, 0.5);
-        text-decoration: none;
-        border-bottom: 1px dotted rgba(244, 228, 193, 0.25);
-      }
-      .reset {
-        font-family: 'Cormorant Garamond', serif;
-        font-size: 14px;
-        background: none;
-        color: rgba(244, 228, 193, 0.5);
-        border: 1px solid rgba(244, 228, 193, 0.2);
-        padding: 9px 22px;
-        border-radius: 999px;
-        letter-spacing: 0.18em;
-        text-transform: uppercase;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      }
-      .reset:hover { color: var(--gold); border-color: rgba(201, 162, 83, 0.4); }
-
-      .variant {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 12px;
-      }
-      .variant-label {
-        font-size: 10px;
-        letter-spacing: 0.28em;
-        color: rgba(244, 228, 193, 0.4);
-        text-transform: uppercase;
-      }
-
-      /* ========================================================== */
-      /* Shared peel-btn base                                          */
-      /*                                                              */
-      /*   layer 1 .reveal  PEELED text — sits underneath              */
-      /*   layer 2 .front   gold sticker face (label rides inside)    */
-      /*   layer 3 .back    underside of sticker, variant-specific    */
-      /*                                                              */
-      /* Each variant defines its own peeled-state clip-paths and    */
-      /* underside gradient. All variants start with full rectangle  */
-      /* minus a tiny TL corner as a visual "peelable" cue.          */
-      /* ========================================================== */
-
-      .peel-btn {
-        position: relative;
-        width: 260px;
-        height: 80px;
-        border: none;
-        background: none;
-        padding: 0;
-        cursor: pointer;
-        font-family: inherit;
-      }
-
-      .peel-btn .reveal {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: var(--burgundy-back);
-        border-radius: 14px;
-        box-shadow:
-          inset 0 1px 0 rgba(0, 0, 0, 0.5),
-          inset 0 0 28px rgba(0, 0, 0, 0.55);
-        font-family: 'Cormorant Garamond', serif;
-        font-weight: 500;
-        font-size: 15px;
-        letter-spacing: 0.32em;
-        color: var(--gold-bright);
-        text-shadow: 0 0 16px rgba(201, 162, 83, 0.6);
-        text-transform: uppercase;
-        z-index: 1;
-      }
-
-      .peel-btn .front {
-        position: absolute;
-        inset: 0;
-        background: linear-gradient(180deg, var(--gold-bright) 0%, var(--gold) 100%);
-        border-radius: 14px;
-        /* All shadows are inset — external box-shadow would paint into
-           the area outside the rect that falls inside the overshoot
-           clip-path polygon, leaving a gold halo after peel-off. */
-        box-shadow:
-          inset 0 0 0 1px rgba(201, 162, 83, 0.65),
-          inset 0 1px 0 rgba(255, 255, 255, 0.3);
-        clip-path: polygon(8% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 8%);
-        z-index: 2;
-      }
-      .peel-btn .front .label {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: 'Cormorant Garamond', serif;
-        font-weight: 600;
-        font-size: 19px;
-        letter-spacing: 0.22em;
-        color: #1a0508;
-        text-transform: uppercase;
-        pointer-events: none;
-        transition: opacity 0.08s linear 0.45s;
-      }
-
-      .peel-btn .back {
-        position: absolute;
-        inset: 0;
-        border-radius: 14px;
-        clip-path: polygon(0% 0%, 8% 0%, 0% 8%, 0% 0%, 0% 0%);
-        filter: drop-shadow(2px 3px 5px rgba(0, 0, 0, 0.5));
-        z-index: 3;
-      }
-
-      .peel-btn:hover .label,
-      .peel-btn.peeling .label {
-        opacity: 0;
-        transition: opacity 0.08s linear 0.25s;
-      }
-
-      /* ========================================================== */
-      /* Variant A — Paper backing                                   */
-      /* Sticker peels diagonally and lifts away. Underside reads as */
-      /* warm cream paper (like a sticker's release liner).          */
-      /* ========================================================== */
-      .peel-btn.peel-a .back {
-        background: linear-gradient(
-          155deg,
-          rgba(232, 216, 184, 0)    0%,
-          rgba(232, 216, 184, 0)    18%,
-          rgba(232, 216, 184, 0.78) 36%,
-          rgba(214, 194, 154, 0.92) 55%,
-          rgba(180, 154, 104, 0.82) 76%,
-          rgba(140, 110, 66, 0)     100%
-        );
-        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease;
-      }
-      .peel-btn.peel-a .front {
-        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1);
-      }
-      .peel-btn.peel-a:hover .front,
-      .peel-btn.peel-a.peeling .front {
-        /* Diagonal cut overshoots to (200%, 0%)→(0%, 200%) — the cut
-           line x+y=200% only touches the rect at the BR corner, so
-           the visible area shrinks continuously to zero. No residual,
-           no opacity hack, peel is gentle all the way through. */
-        clip-path: polygon(200% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 200%);
-      }
-      .peel-btn.peel-a:hover .back,
-      .peel-btn.peel-a.peeling .back {
-        /* Back's outer edge tracks the front's so they meet at the
-           fold line throughout the animation. Opacity fades at the
-           tail so the PEELED text reads cleanly once the peel ends. */
-        clip-path: polygon(0% 0%, 200% 0%, 0% 200%, 0% 0%, 0% 0%);
-        opacity: 0;
-        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease 0.5s;
-      }
-
-      /* ========================================================== */
-      /* Variant B — Burgundy underside                              */
-      /* Same peel motion as A but underside is deep burgundy, so   */
-      /* the sticker appears to peel into the page itself.           */
-      /* ========================================================== */
-      .peel-btn.peel-b .back {
-        background: linear-gradient(
-          165deg,
-          rgba(40, 14, 22, 0)    0%,
-          rgba(40, 14, 22, 0)    18%,
-          rgba(58, 20, 30, 0.55) 36%,
-          rgba(82, 30, 44, 0.9)  55%,
-          rgba(110, 48, 68, 0.85) 75%,
-          rgba(150, 80, 100, 0)  100%
-        );
-        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease;
-      }
-      .peel-btn.peel-b .front {
-        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease;
-      }
-      .peel-btn.peel-b:hover .front,
-      .peel-btn.peel-b.peeling .front {
-        clip-path: polygon(100% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 100%);
-        opacity: 0;
-        transition: clip-path 0.7s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease 0.5s;
-      }
-      .peel-btn.peel-b:hover .back,
-      .peel-btn.peel-b.peeling .back {
-        clip-path: polygon(0% 0%, 100% 0%, 0% 100%, 0% 0%, 0% 0%);
-        opacity: 0;
-        transition: clip-path 0.75s cubic-bezier(0.55, 0.05, 0.4, 1),
-                    opacity 0.3s ease 0.5s;
-      }
-
-      /* ========================================================== */
-      /* Variant C — Lift & rotate off                               */
-      /* Sticker peels lightly, then the whole thing translates +   */
-      /* rotates + fades away — like being picked off with tweezers.*/
-      /* ========================================================== */
-      .peel-btn.peel-c .back {
-        background: linear-gradient(
-          155deg,
-          rgba(232, 216, 184, 0)    0%,
-          rgba(232, 216, 184, 0)    22%,
-          rgba(218, 200, 162, 0.88) 48%,
-          rgba(186, 158, 108, 0.55) 85%,
-          rgba(140, 110, 66, 0)     100%
-        );
-      }
-      .peel-btn.peel-c .front,
-      .peel-btn.peel-c .back {
-        transform-origin: 100% 100%;
-        transition: transform 0.85s cubic-bezier(0.5, 0.05, 0.3, 1),
-                    clip-path 0.6s cubic-bezier(0.5, 0.05, 0.3, 1),
-                    opacity 0.45s ease 0.4s;
-      }
-      .peel-btn.peel-c:hover .front,
-      .peel-btn.peel-c.peeling .front {
-        clip-path: polygon(55% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 55%);
-        transform: translate(48%, 75%) rotate(-20deg);
-        opacity: 0;
-      }
-      .peel-btn.peel-c:hover .back,
-      .peel-btn.peel-c.peeling .back {
-        clip-path: polygon(0% 0%, 55% 0%, 0% 55%, 0% 0%, 0% 0%);
-        transform: translate(48%, 75%) rotate(-20deg);
-        opacity: 0;
-      }
-    </style>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" />
+    <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <main class="lab">
-      <h1>Peel Lab</h1>
+    <div class="rotate-prompt" aria-hidden="true">
+      <div class="rotate-icon">⟳</div>
+      <div class="rotate-heading">Rotate your device</div>
+      <div class="rotate-body">Touch Marathon is designed for landscape.</div>
+    </div>
 
-      <div class="variant">
-        <span class="variant-label">A &middot; Paper backing</span>
-        <button class="peel-btn peel-a" type="button">
-          <span class="reveal">PEELED</span>
-          <span class="front">
-            <span class="label">CLICK ME</span>
-          </span>
-          <span class="back" aria-hidden="true"></span>
-        </button>
-      </div>
+    <main id="app" class="app">
+      <!-- SCREEN 1: Splash -->
+      <section class="screen splash" data-screen="splash" aria-hidden="false">
+        <div class="splash-mark">
+          <span class="mark-glyph">∞</span>
+          <span class="mark-name">Touch Marathon</span>
+        </div>
+      </section>
 
-      <div class="variant">
-        <span class="variant-label">B &middot; Burgundy underside</span>
-        <button class="peel-btn peel-b" type="button">
-          <span class="reveal">PEELED</span>
-          <span class="front">
-            <span class="label">CLICK ME</span>
-          </span>
-          <span class="back" aria-hidden="true"></span>
-        </button>
-      </div>
+      <!-- SCREENS 2–5: Intro Title + Prep 2.1 / 2.2 / 2.3 -->
+      <section class="screen intro" data-screen="intro" aria-hidden="true">
+        <header class="topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Touch Marathon</span>
+          </div>
+          <div class="intro-dots" aria-hidden="true">
+            <span class="dot" data-dot="0"></span>
+            <span class="dot" data-dot="1"></span>
+            <span class="dot" data-dot="2"></span>
+            <span class="dot" data-dot="3"></span>
+          </div>
+        </header>
+        <div class="intro-body">
+          <h1 class="intro-title"></h1>
+          <p class="intro-subtitle"></p>
+          <div class="intro-flag"></div>
+          <div class="intro-copy"></div>
+        </div>
+        <footer class="intro-footer">
+          <button class="btn btn-primary intro-next" type="button">Next</button>
+        </footer>
+      </section>
 
-      <div class="variant">
-        <span class="variant-label">C &middot; Lift &amp; rotate off</span>
-        <button class="peel-btn peel-c" type="button">
-          <span class="reveal">PEELED</span>
-          <span class="front">
-            <span class="label">CLICK ME</span>
-          </span>
-          <span class="back" aria-hidden="true"></span>
-        </button>
-      </div>
+      <!-- SCREEN 5: Marathon -->
+      <section class="screen marathon" data-screen="marathon" aria-hidden="true">
+        <div class="marathon-bg" aria-hidden="true"></div>
 
-      <p class="hint">Hover to preview &middot; Click to lock peeled</p>
+        <header class="topbar marathon-topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Touch Marathon</span>
+          </div>
+          <div class="header-ticker" aria-live="polite">
+            <span class="header-msg"></span>
+          </div>
+        </header>
 
-      <button class="reset" type="button">Reset all</button>
+        <div class="wheels" aria-label="Three slot machine wheels">
+          <div class="wheel" data-wheel="1">
+            <div class="wheel-viewport">
+              <div class="wheel-strip"></div>
+            </div>
+            <div class="wheel-focus" aria-hidden="true"></div>
+          </div>
+          <div class="wheel" data-wheel="2">
+            <div class="wheel-viewport">
+              <div class="wheel-strip"></div>
+            </div>
+            <div class="wheel-focus" aria-hidden="true"></div>
+          </div>
+          <div class="wheel" data-wheel="3">
+            <div class="wheel-viewport">
+              <div class="wheel-strip"></div>
+            </div>
+            <div class="wheel-focus" aria-hidden="true"></div>
+          </div>
+        </div>
 
-      <p class="credit">
-        Technique adapted from
-        <a href="https://codepen.io/patrickkunka/pen/axEgL" target="_blank" rel="noopener">
-          Patrick Kunka
-        </a>
-      </p>
+        <footer class="marathon-footer">
+          <div class="timer">
+            <div class="timer-track">
+              <div class="timer-fill"></div>
+            </div>
+          </div>
+          <button class="btn btn-spin" type="button" disabled>Spin</button>
+        </footer>
+
+        <!-- Part 4 in-game overlay: fades after a few seconds -->
+        <div class="game-overlay" aria-hidden="true">
+          <div class="game-overlay-inner">
+            <div class="game-overlay-heading"></div>
+            <div class="game-overlay-body"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SCREEN: Semi-Final (Beta opt-in / email capture) -->
+      <section class="screen semi-final" data-screen="semi-final" aria-hidden="true">
+        <header class="topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Touch Marathon</span>
+          </div>
+        </header>
+        <div class="semi-final-body">
+          <h1 class="semi-final-heading"></h1>
+          <div class="semi-final-copy"></div>
+          <form class="semi-final-form" novalidate>
+            <div class="semi-final-input-row">
+              <input
+                id="semi-final-email"
+                class="semi-final-input"
+                type="email"
+                inputmode="email"
+                autocomplete="email"
+                spellcheck="false"
+                placeholder=""
+                required
+              />
+              <button class="btn btn-primary semi-final-submit" type="submit">Notify Me</button>
+            </div>
+            <label class="semi-final-consent">
+              <input type="checkbox" class="semi-final-consent-box" required />
+              <span class="semi-final-consent-text"></span>
+            </label>
+            <div class="semi-final-feedback" role="status" aria-live="polite"></div>
+          </form>
+          <div class="semi-final-teaser"></div>
+        </div>
+      </section>
+
+      <!-- SCREEN: Final (post-submit thank-you) -->
+      <section class="screen final" data-screen="final" aria-hidden="true">
+        <header class="topbar">
+          <div class="brand-mark">
+            <span class="mark-glyph">∞</span>
+            <span class="mark-name">Touch Marathon</span>
+          </div>
+        </header>
+        <div class="final-body">
+          <h1 class="final-heading"></h1>
+          <div class="final-copy"></div>
+        </div>
+      </section>
     </main>
 
-    <script>
-      document.querySelectorAll('.peel-btn').forEach(btn => {
-        btn.addEventListener('click', () => btn.classList.toggle('peeling'));
-      });
-      document.querySelector('.reset').addEventListener('click', () => {
-        document.querySelectorAll('.peel-btn').forEach(btn => btn.classList.remove('peeling'));
-      });
-    </script>
+    <script src="content.js"></script>
+    <script src="script.js"></script>
   </body>
 </html>
